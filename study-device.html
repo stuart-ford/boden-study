@@ -226,6 +226,7 @@
     #app { max-width: 1600px; margin: 0 auto; }
     #float-home-btn { left: calc((100vw - 1600px) / 2 + 18px); }
   }
+
 </style>
 </head>
 <body>
@@ -276,7 +277,7 @@
   <!-- EMAIL DETAIL -->
   <div class="screen app-screen" id="email-view">
     <div class="email-header">
-      <button class="email-back" onclick="go('mail')">‹ Inbox</button>
+      <button class="email-back" onclick="dismissNewEmailNotif();go('mail')">‹ Inbox</button>
       <div class="email-subject" id="ev-subject"></div>
       <div class="email-sender-row">
         <div class="email-avatar-sm" id="ev-avatar"></div>
@@ -363,6 +364,9 @@
     </div>
   </div>
 
+  <!-- Floating fast-forward button (mail time-advance) -->
+  <button id="float-ff-btn" onclick="fastForwardDay()" aria-label="Fast-forward to next day" title="Fast-forward study timeline" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:70px;width:44px;height:44px;border-radius:22px;background:rgba(16,16,46,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,0.18);cursor:pointer;z-index:9000;display:none;align-items:center;justify-content:center;font-size:17px;color:rgba(255,255,255,0.9);box-shadow:0 2px 12px rgba(0,0,0,0.25);font-family:system-ui;gap:1px;transition:background 0.3s ease;">⏱︎&#xFE0E;<span style="font-size:13px;line-height:1">⏩</span></button>
+
   <!-- Floating home button -->
   <button id="float-home-btn" onclick="floatGoHome()" aria-label="Home" style="position:fixed;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:18px;width:44px;height:44px;border-radius:22px;background:rgba(16,16,46,0.72);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:0.5px solid rgba(255,255,255,0.18);cursor:pointer;z-index:9000;display:none;align-items:center;justify-content:center;font-size:19px;color:rgba(255,255,255,0.9);box-shadow:0 2px 12px rgba(0,0,0,0.25);font-family:system-ui;">&#8962;</button>
 
@@ -404,6 +408,7 @@
         <div class="admin-status-row"><span class="admin-status-key">Notifications</span><span class="admin-status-val" id="st-notif">not triggered</span></div>
         <div class="admin-status-row"><span class="admin-status-key">Browser page</span><span class="admin-status-val" id="st-browser">mini-bag</span></div>
         <div class="admin-status-row"><span class="admin-status-key">Emails visible</span><span class="admin-status-val" id="st-emails">—</span></div>
+        <div class="admin-status-row"><span class="admin-status-key">Study day</span><span class="admin-status-val" id="st-day">pre-order</span></div>
       </div>
 
     </div>
@@ -439,27 +444,103 @@
       </div>
     </div>
   </div>
+  <!-- Generic new email notification — shown on mobile when FF advances a tick from email-view -->
+  <div class="notif" id="notif-new-email">
+    <div class="notif-inner" onclick="openNotifNewEmail()">
+      <div class="notif-icon" style="background:#1a73e8">✉️</div>
+      <div class="notif-content">
+        <div class="notif-app-row">
+          <span class="notif-app-label">Mail</span>
+          <span class="notif-time-label">now</span>
+        </div>
+        <div class="notif-from" id="notif-new-email-from"></div>
+        <div class="notif-body" id="notif-new-email-body"></div>
+      </div>
+    </div>
+  </div>
+  <!-- Harper SMS notification — shown when FF pressed on Harper emails 3, 2, 1 -->
+  <div class="notif" id="notif-harper-sms">
+    <div class="notif-inner" onclick="openNotifSMS()">
+      <div class="notif-icon" style="background:#1e9e50">💬</div>
+      <div class="notif-content">
+        <div class="notif-app-row">
+          <span class="notif-app-label">Messages</span>
+          <span class="notif-time-label">now</span>
+        </div>
+        <div class="notif-from">Harper</div>
+        <div class="notif-body" id="notif-harper-sms-body"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 const IMG = "https://stuart-ford.github.io/boden-study/images/";
 
-/* ── Email data ── */
-/* study: true = study email | showInMode: which inbox modes reveal it */
-const EMAILS_SOURCE = [
-  // Study emails — later in the journey (admin QA / show all only)
-  { id:1, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden try on period has ended", preview:"Your try on period has now ended. We hope you enjoyed the service.", time:"Today", unread:true, image:IMG+"Email%20-%20Harper%20Your%20Try%20Before%20You%20Buy%20Payment%20-%20Nothing%20Kept.png" },
-  { id:2, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period ends tomorrow for Boden order (UK1234567)", preview:"A gentle reminder that your try on period ends at midnight tomorrow.", time:"Yesterday", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Ends%20Tomorrow.png" },
-  { id:3, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period has started for Boden order (UK1234567)", preview:"Your pieces have arrived and your try on period has started.", time:"Mon", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Has%20Started.png" },
-  { id:4, study:true, showInMode:['all'], from:"Boden", addr:"orders@boden.co.uk", subject:"Your Try Before You Buy order (UK1234567) has been shipped", preview:"Your BODEN order is on its way. We've handed it to our delivery partner.", time:"Sun", unread:true, image:IMG+"Email%20-%20Boden%20-%20Shipping%20Confirmation.png" },
-  // Study emails — order confirmation pair (appear via notification after order placed)
-  { id:5, study:true, showInMode:['post-order','all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden Try Before You Buy order (UK1234567) confirmation", preview:"Your Boden Try Before You Buy order is confirmed. Your 7 day try on period will begin once your pieces arrive.", time:"Just now", unread:true, image:IMG+"Email%20-%20Harper%20-%20Order%20Confirmed.png" },
-  { id:6, study:true, showInMode:['post-order','all'], from:"Boden", addr:"orders@boden.co.uk", subject:"Thank you for your Try Before You Buy order (UK1234567)", preview:"Thank you for choosing BODEN. We've received your order and we'll be in touch when it's on its way.", time:"Just now", unread:true, image:IMG+"Email%20-%20Boden%20-%20Order%20Confirmed.png" },
-  // Dummy filler emails — always visible
-  { id:7, study:false, from:"James Morris", addr:"j.morris@example.com", subject:"Re: Weekend plans", preview:"Sounds great — shall we say 7pm at the usual place?", time:"Fri", unread:false, image:null, body:"Sounds great to me — shall we say 7pm at the usual place?\n\nOn Fri 23 May, you wrote:\n> Hey, fancy grabbing dinner Saturday?\n\nJames" },
-  { id:8, study:false, from:"Netflix", addr:"info@mailer.netflix.com", subject:"New episodes added this week", preview:"Don't miss what's new. New seasons and new films just dropped.", time:"Thu", unread:false, image:null, body:"New this week on Netflix\n\n• The Crown: Series 7 — all episodes\n• Wednesday: Season 3, episodes 1–4\n• Leave the World Behind (Film)\n\nOpen the app to start watching." },
-  { id:9, study:false, from:"HSBC", addr:"noreply@hsbc.co.uk", subject:"Your statement is ready", preview:"Your May 2026 statement is now available to view online.", time:"Wed", unread:false, image:null, body:"Dear Customer,\n\nYour monthly statement for May 2026 is now ready to view in your online banking.\n\nAccount: Current Account ••••4821\nStatement date: 25 May 2026\n\nHSBC UK" },
+/* ── Dynamic timestamp helper ── */
+/* Day 1 = today. Returns a display string relative to today. */
+function emailTimestamp(studyDayNum) {
+  const today = new Date();
+  const target = new Date(today);
+  target.setDate(today.getDate() + (studyDayNum - 1));
+  const diff = studyDayNum - 1; // days offset from today
+  if (diff === 0) return 'Today';
+  if (diff === 1) return 'Tomorrow';
+  if (diff < 0) return 'Recently';
+  // For future days, show weekday name
+  const days = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  return days[target.getDay()];
+}
+
+/* ── Email flow definition ── */
+/*
+  studyDay: the day in the study this email becomes available (Day 1 = order placed)
+  unlockAfterDay: visible once studyDay counter >= this value
+  showInMode: which inbox modes reveal it
+  Flow:
+    Day 1  — Order Confirmation (Harper) + Order Confirmation (Boden) — via notification
+    Day 1  — Shipping Confirmation (Boden)
+    Day 2  — Carrier Received Item (placeholder)
+    Day 3  — Carrier Item Out for Delivery (placeholder)
+    Day 3  — Carrier Item Delivered (placeholder)
+    Day 3  — Harper Try On Started
+    Day 6  — Harper Trial Ending Tomorrow
+    Day 7  — Harper Trial Ended
+*/
+const EMAIL_FLOW = [
+  // tick: the fast-forward step at which this email becomes visible.
+  // Notif emails (tick 1) arrive together via the order notification pair.
+  // All other emails arrive one per fast-forward press, in chronological order.
+  // studyDay: the simulated calendar day (Day 1 = order day), used for timestamp display only.
+  { id:5,  tick:1, studyDay:1, triggerViaNotif:true,  from:"Harper Try Before You Buy", addr:"service@harperconcierge.com", subject:"Your Boden Try Before You Buy order (UK1234567) confirmation", preview:"Your Boden Try Before You Buy order is confirmed. Your 7 day try on period will begin once your pieces arrive.", image:IMG+"Email%20-%20Harper%20-%20Order%20Confirmed.png" },
+  { id:6,  tick:1, studyDay:1, triggerViaNotif:true,  from:"Boden", addr:"orders@boden.co.uk", subject:"Thank you for your Try Before You Buy order (UK1234567)", preview:"Thank you for choosing BODEN. We've received your order and we'll be in touch when it's on its way.", image:IMG+"Email%20-%20Boden%20-%20Order%20Confirmed.png" },
+  { id:10, tick:2, studyDay:1, triggerViaNotif:false, from:"Boden", addr:"orders@boden.co.uk", subject:"Your Try Before You Buy order (UK1234567) has been shipped", preview:"Your BODEN order is on its way. We've handed it to our delivery partner.", image:IMG+"Email%20-%20Boden%20-%20Shipping%20Confirmation.png" },
+  { id:11, tick:3, studyDay:2, triggerViaNotif:false, from:"Evri", addr:"noreply@evri.com", subject:"We've got your Boden parcel", preview:"We'll let you know when it's out for delivery. Your Boden is on its way to your local depot.", image:IMG+"Evri%20-%20We%27ve%20Got%20It.png" },
+  { id:13, tick:4, studyDay:3, triggerViaNotif:false, from:"Evri", addr:"noreply@evri.com", subject:"We've delivered your Boden parcel", preview:"Daniel delivered your Boden parcel. View your delivery details.", image:IMG+"Evri%20-%20Delivered.png" },
+  { id:3,  tick:5, studyDay:3, triggerViaNotif:false, from:"Harper Try Before You Buy", addr:"service@harperconcierge.com", subject:"Your try on period has started for Boden order (UK1234567)", preview:"Your pieces have arrived and your try on period has started.", image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Has%20Started.png" },
+  { id:2,  tick:6, studyDay:6, triggerViaNotif:false, from:"Harper Try Before You Buy", addr:"service@harperconcierge.com", subject:"Your try on period ends tomorrow for Boden order (UK1234567)", preview:"A gentle reminder that your try on period ends at midnight tomorrow.", image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Ends%20Tomorrow.png" },
+  { id:1,  tick:7, studyDay:7, triggerViaNotif:false, from:"Harper Try Before You Buy", addr:"service@harperconcierge.com", subject:"Your Boden try on period has ended", preview:"Your try on period has now ended. We hope you enjoyed the service.", image:IMG+"Email%20-%20Harper%20Your%20Try%20Before%20You%20Buy%20Payment%20-%20Nothing%20Kept.png" },
 ];
+
+/* Build EMAILS_SOURCE with dynamic timestamps */
+function buildEmailsSource() {
+  const studyEmails = EMAIL_FLOW.map(e => ({
+    ...e,
+    study: true,
+    showInMode: e.triggerViaNotif ? ['post-order','all'] : ['all'],
+    unread: true,
+    time: emailTimestamp(e.studyDay),
+  }));
+  // studyEmails already include tick from EMAIL_FLOW spread
+  const fillerEmails = [
+    { id:7, study:false, from:"James Morris", addr:"j.morris@example.com", subject:"Re: Weekend plans", preview:"Sounds great — shall we say 7pm at the usual place?", time:"Fri", unread:false, image:null, body:"Sounds great to me — shall we say 7pm at the usual place?\n\nOn Fri 23 May, you wrote:\n> Hey, fancy grabbing dinner Saturday?\n\nJames" },
+    { id:8, study:false, from:"Netflix", addr:"info@mailer.netflix.com", subject:"New episodes added this week", preview:"Don't miss what's new. New seasons and new films just dropped.", time:"Thu", unread:false, image:null, body:"New this week on Netflix\n\n• The Crown: Series 7 — all episodes\n• Wednesday: Season 3, episodes 1–4\n• Leave the World Behind (Film)\n\nOpen the app to start watching." },
+    { id:9, study:false, from:"HSBC", addr:"noreply@hsbc.co.uk", subject:"Your statement is ready", preview:"Your May 2026 statement is now available to view online.", time:"Wed", unread:false, image:null, body:"Dear Customer,\n\nYour monthly statement for May 2026 is now ready to view in your online banking.\n\nAccount: Current Account ••••4821\nStatement date: 25 May 2026\n\nHSBC UK" },
+  ];
+  return [...studyEmails, ...fillerEmails];
+}
+
+const EMAILS_SOURCE = buildEmailsSource();
 
 const THREADS = [
   { id:2, name:"Tom Briggs", avatar:"T", time:"Yesterday", unread:1, last:"No rush, just let me know when you get a chance", msgs:[
@@ -470,8 +551,44 @@ const THREADS = [
   { id:3, name:"Deliveroo", avatar:"D", time:"Tue", unread:0, last:"Your rider is nearby — arriving in 5 mins", msgs:[
     {me:false,text:"Your order from Honest Burgers is on its way! Estimated arrival: 8:45pm",t:"Tue 20:31"},
     {me:false,text:"Your rider is nearby — arriving in 5 mins",t:"Tue 20:40"},
-  ]}
+  ]},
+  // Harper SMS thread — messages unlock progressively via fast-forward
+  { id:4, name:"Harper", avatar:"H", time:"", unread:0, last:"", msgs:[], harperThread:true },
 ];
+
+// Harper SMS messages — each tied to a study email tick
+const HARPER_SMS = [
+  {
+    afterEmailId: 3, // unlocks after "Try on period has started" (tick 5)
+    // Timestamp: day after try-on started email (studyDay 4) at 10:01
+    smsDay: 4, smsTime: "10:01",
+    text: "Hello Kate. Your Boden Try Before You Buy order has arrived and your 7 day try on period has now begun. If you wish to return any pieces, please register them via the return portal link provided to ensure you are charged correctly. Return portal: https://hrpr/to/gTwzg2",
+  },
+  {
+    afterEmailId: 2, // unlocks after "Try on period ends tomorrow" (tick 6)
+    // Timestamp: day 6 at 16:47
+    smsDay: 6, smsTime: "16:47",
+    text: "This is a gentle reminder that your Boden try on period ends tomorrow. If you are keeping all pieces, no further action is required. If you have any returns, we have not yet received details of which pieces you are sending back. Please ensure you use the return portal link provided to ensure you are charged correctly. Return portal: https://hrpr/to/gTwzg2",
+  },
+  {
+    afterEmailId: 1, // unlocks after "Try on period has ended" (tick 7)
+    // Timestamp: day 7 at 10:00
+    smsDay: 7, smsTime: "10:00",
+    text: "Hi Kate, we'd love to hear about your recent Try Before You Buy experience with Boden. Please take a moment to share your feedback in our quick survey, so we can make your next visit even better: https://hrpr.to/ovsFq1",
+  },
+];
+
+// Returns a display label for an SMS day offset, e.g. "Today", "Mon 10:01"
+function smsTimestamp(smsDay, smsTime) {
+  // smsDay is relative to studyDay 1 = today
+  const daysAgo = studyDay - smsDay;
+  const d = new Date();
+  d.setDate(d.getDate() - daysAgo);
+  const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  if (daysAgo === 0) return smsTime;
+  if (daysAgo === 1) return 'Yesterday';
+  return dayNames[d.getDay()];
+}
 
 /* ── State ── */
 let emails = EMAILS_SOURCE.map(e => ({...e}));
@@ -484,6 +601,8 @@ let hfStep = 1;        // 1=details 2=service 3=payment
 let hfDetails = {};    // captured from step 1
 let hfDelivery = null; // 'standard' | 'express'
 let currentOpenEmail = null; // tracks open email for desktop two-panel view
+let studyDay = 0;      // 0=pre-order; 1=order day; used for timestamp display
+let studyTick = 1;     // current unlock tick (ticks 2-7 unlocked one-per-FF press)
 
 /* ── Clock ── */
 function updateClock() {
@@ -505,6 +624,7 @@ function go(screenId) {
   currentScreen = screenId;
   if (screenId === 'admin') updateAdminStatus();
   updateFloatHome();
+  updateFastForwardBtn();
   const sa = document.getElementById(screenId)?.querySelector(".scroll-area,.admin-scroll");
   if (sa && screenId !== "email-view" && screenId !== "sms-view") sa.scrollTop = 0;
 }
@@ -513,8 +633,16 @@ function go(screenId) {
 function getVisibleEmails() {
   return emails.filter(e => {
     if (!e.study) return true;
+    // Admin "show all" toggle overrides everything
     if (inboxMode === 'all') return true;
-    if (inboxMode === 'post-order') return e.showInMode.includes('post-order');
+    // Gate by studyTick: each non-notif email unlocks one tick at a time.
+    // Notif emails (tick 1) are exposed via inboxMode='post-order' when order placed.
+    if (studyDay >= 1) {
+      // tick 1 = notif emails (shown once inboxMode=post-order is set)
+      if (e.tick === 1) return e.showInMode.includes('post-order');
+      // other ticks unlock sequentially as studyTick advances
+      return e.tick <= studyTick;
+    }
     return false;
   });
 }
@@ -557,7 +685,13 @@ function renderMailList() {
   const ul = document.getElementById("mail-list");
   if (!ul) return;
   ul.innerHTML = "";
-  visible.forEach(e => {
+  // Sort newest first: higher tick = more recent email; filler emails go last
+  const sorted = [...visible].sort((a, b) => {
+    const ta = a.tick ?? -1;
+    const tb = b.tick ?? -1;
+    return tb - ta; // descending tick = newest study email first; filler (no tick) at end
+  });
+  sorted.forEach(e => {
     const isActive = isDesktop && currentOpenEmail?.id === e.id;
     const btn = document.createElement("button");
     btn.className = "mail-row" + (e.unread ? " unread" : "") + (isActive ? " mail-row-active" : "");
@@ -610,7 +744,16 @@ function renderEmailRightPanel(email) {
     const img = new Image();
     img.alt = email.subject;
     img.style.cssText = 'width:100%;display:block;';
-    img.onload = () => { const l = document.getElementById('erp-loading'); if(l) l.replaceWith(img); };
+    img.onload = () => {
+      const l = document.getElementById('erp-loading');
+      if (l) {
+        const wrap = document.createElement('div');
+        wrap.className = 'email-img-wrap';
+        wrap.style.cssText = 'position:relative;line-height:0;';
+        wrap.appendChild(img);
+        l.replaceWith(wrap);
+      }
+    };
     img.onerror = () => { const l = document.getElementById('erp-loading'); if(l) l.textContent = 'Could not load email.'; };
     img.src = email.image;
   } else if (email.body) {
@@ -651,7 +794,15 @@ function openEmail(id) {
     body.appendChild(loading);
     const img = document.createElement("img");
     img.alt = e.subject;
-    img.onload = () => { body.innerHTML = ""; body.appendChild(img); };
+    img.style.cssText = 'width:100%;display:block';
+    img.onload = () => {
+      body.innerHTML = "";
+      const wrap = document.createElement("div");
+      wrap.className = "email-img-wrap";
+      wrap.style.cssText = "position:relative;line-height:0;";
+      wrap.appendChild(img);
+      body.appendChild(wrap);
+    };
     img.onerror = () => { loading.textContent = "Could not load email image."; };
     img.src = e.image;
   } else if (e.body) {
@@ -667,11 +818,16 @@ function openEmail(id) {
 
 /* ── Notifications ── */
 function showOrderNotifications() {
+  studyDay = 1;
+  studyTick = 1; // tick 1 = the notif pair; ticks 2+ unlock via FF button
   inboxMode = 'post-order';
+  // Refresh timestamps now that studyDay is set
+  refreshEmailTimestamps();
   emails.forEach(e => { if (e.id === 5 || e.id === 6) e.unread = true; });
   renderMailList();
   notificationsTriggered = true;
   updateAdminStatus();
+  updateFastForwardBtn();
 
   const n1 = document.getElementById('notif-harper');
   const n2 = document.getElementById('notif-boden');
@@ -686,7 +842,162 @@ function adminTriggerNotifications() {
   // Force retrigger for researcher (e.g. between participants)
   ['notif-harper','notif-boden'].forEach(id => document.getElementById(id).classList.remove('show'));
   notificationsTriggered = false;
+  studyDay = 0;
+  studyTick = 1;
+  pendingSmsThreadId = null;
   setTimeout(() => showOrderNotifications(), 200);
+}
+
+/* ── Fast-forward: advance studyTick one step, revealing next email or SMS ── */
+const TICK_MAX = 7; // ticks 2–7 are fast-forward unlockable (tick 1 = notif pair)
+
+// Email IDs that trigger an SMS notification after being revealed
+const SMS_TRIGGER_EMAIL_IDS = [3, 2, 1]; // try-on started, ends tomorrow, ended
+
+// Tracks whether we're in "waiting for SMS read" state (FF on SMS takes user to mail)
+let pendingSmsThreadId = null; // set when SMS notif fires; cleared when SMS opened
+
+function fastForwardDay() {
+  // If on SMS app with a pending Harper thread — navigate to mail inbox
+  if ((currentScreen === 'sms' || currentScreen === 'sms-view') && pendingSmsThreadId) {
+    pendingSmsThreadId = null;
+    go('mail');
+    updateFastForwardBtn();
+    return;
+  }
+
+  if (studyTick >= TICK_MAX) return; // already at end
+  studyTick++;
+
+  // Update studyDay to match the email just unlocked (for timestamps)
+  const unlocked = EMAIL_FLOW.find(e => e.tick === studyTick);
+  if (unlocked) studyDay = Math.max(studyDay, unlocked.studyDay);
+  refreshEmailTimestamps();
+
+  // Mark newly unlocked email as unread
+  emails.forEach(e => {
+    if (e.study && e.tick === studyTick) e.unread = true;
+  });
+  renderMailList();
+  updateAdminStatus();
+
+  // On mobile, if the user is on email-view, they won't see the inbox update —
+  // fire a notification banner so they know the new email has arrived.
+  if (unlocked && window.innerWidth < 1024 && currentScreen === 'email-view') {
+    showNewEmailNotif(unlocked);
+  }
+
+  // Check if this tick's email should also trigger an SMS
+  if (unlocked && SMS_TRIGGER_EMAIL_IDS.includes(unlocked.id)) {
+    const smsDef = HARPER_SMS.find(s => s.afterEmailId === unlocked.id);
+    if (smsDef) {
+      setTimeout(() => triggerHarperSMS(smsDef), 800);
+    }
+  }
+
+  updateFastForwardBtn();
+
+  // Flash feedback on button
+  const btn = document.getElementById('float-ff-btn');
+  if (btn) {
+    btn.style.background = 'rgba(30,158,80,0.85)';
+    setTimeout(() => { btn.style.background = 'rgba(16,16,46,0.72)'; }, 600);
+  }
+}
+
+function triggerHarperSMS(smsDef) {
+  // Add message to Harper thread
+  const harperThread = THREADS.find(t => t.harperThread);
+  if (!harperThread) return;
+  const ts = smsTimestamp(smsDef.smsDay, smsDef.smsTime);
+  const fullTs = (() => {
+    // Build a full timestamp label: "DayName HH:MM" or "Today HH:MM"
+    const daysAgo = studyDay - smsDef.smsDay;
+    if (daysAgo === 0) return 'Today ' + smsDef.smsTime;
+    if (daysAgo === 1) return 'Yesterday ' + smsDef.smsTime;
+    const d = new Date(); d.setDate(d.getDate() - daysAgo);
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    return dayNames[d.getDay()] + ' ' + smsDef.smsTime;
+  })();
+  harperThread.msgs.push({ me:false, text:smsDef.text, t:fullTs });
+  harperThread.last = smsDef.text;
+  harperThread.time = ts;
+  harperThread.unread = (harperThread.unread || 0) + 1;
+  renderSmsList();
+
+  // Show SMS notification banner
+  pendingSmsThreadId = harperThread.id;
+  const bodyEl = document.getElementById('notif-harper-sms-body');
+  if (bodyEl) bodyEl.textContent = smsDef.text.substring(0, 80) + (smsDef.text.length > 80 ? '…' : '');
+  const notif = document.getElementById('notif-harper-sms');
+  if (notif) {
+    notif.classList.add('show');
+    // Persists until user taps
+  }
+  updateFastForwardBtn();
+}
+
+function openNotifSMS() {
+  const notif = document.getElementById('notif-harper-sms');
+  if (notif) notif.classList.remove('show');
+  const harperThread = THREADS.find(t => t.harperThread);
+  if (harperThread) {
+    go('sms');
+    renderSmsList();
+    openThread(harperThread.id);
+  }
+}
+
+function updateFastForwardBtn() {
+  const btn = document.getElementById('float-ff-btn');
+  if (!btn) return;
+  const onMailScreen = currentScreen === 'mail' || currentScreen === 'email-view';
+  const onSmsScreen  = currentScreen === 'sms'  || currentScreen === 'sms-view';
+  const hasMoreTicks = studyTick < TICK_MAX;
+  const active = notificationsTriggered && studyDay >= 1;
+  // Show on mail/email-view when there are more emails to unlock
+  const showForMail = onMailScreen && active && hasMoreTicks;
+  // Show on sms/sms-view when waiting to navigate back to mail after reading SMS
+  const showForSms  = onSmsScreen && pendingSmsThreadId !== null;
+  btn.style.display = (showForMail || showForSms) ? 'flex' : 'none';
+}
+
+function refreshEmailTimestamps() {
+  // "Current simulated day" = studyDay of the most recently unlocked email.
+  // Emails from today show "Today", yesterday show "Yesterday", older show weekday.
+  const currentSimDay = studyDay; // already updated by fastForwardDay
+  emails.forEach(e => {
+    if (!e.study) return;
+    const daysAgo = currentSimDay - e.studyDay;
+    if (daysAgo < 0) { e.time = emailTimestamp(e.studyDay); return; } // not yet reached
+    if (daysAgo === 0) { e.time = 'Today'; return; }
+    if (daysAgo === 1) { e.time = 'Yesterday'; return; }
+    // Compute an actual weekday label going back from today
+    const d = new Date();
+    d.setDate(d.getDate() - daysAgo);
+    const dayNames = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    e.time = dayNames[d.getDay()];
+  });
+}
+
+function dismissNewEmailNotif() {
+  const notif = document.getElementById('notif-new-email');
+  if (notif) notif.classList.remove('show');
+}
+
+function showNewEmailNotif(emailDef) {
+  const fromEl = document.getElementById('notif-new-email-from');
+  const bodyEl = document.getElementById('notif-new-email-body');
+  if (fromEl) fromEl.textContent = emailDef.from;
+  if (bodyEl) bodyEl.textContent = emailDef.preview.substring(0, 80) + (emailDef.preview.length > 80 ? '…' : '');
+  const notif = document.getElementById('notif-new-email');
+  if (notif) notif.classList.add('show');
+}
+
+function openNotifNewEmail() {
+  const notif = document.getElementById('notif-new-email');
+  if (notif) notif.classList.remove('show');
+  go('mail');
 }
 
 function openNotifEmail(emailId) {
@@ -694,6 +1005,7 @@ function openNotifEmail(emailId) {
   go('mail');
   renderMailList(); // ensures desktop two-panel is built before opening
   openEmail(emailId);
+  updateFastForwardBtn();
 }
 
 /* ── SMS ── */
@@ -726,6 +1038,9 @@ function renderSmsList() {
 function openThread(id) {
   const t = THREADS.find(x => x.id === id);
   if (!t) return;
+  // Mark as read
+  t.unread = 0;
+  renderSmsList();
   document.getElementById("tv-avatar").textContent = t.avatar;
   document.getElementById("tv-name").textContent = t.name;
   const container = document.getElementById("tv-bubbles");
@@ -831,6 +1146,7 @@ function renderBrowserPage() {
       <div style="position:relative;width:100%;line-height:0">
         <img src="${IMG}WL%20-%20Bag%20-%20Default%20-v%20Desktop.png" style="width:100%;display:block" alt="Boden My Bag">
         <div class="hotspot" onclick="goPage('harper-basket')" style="position:absolute;top:43%;left:61%;width:37%;height:5%;" aria-label="Try Before You Buy"></div>
+        <div class="hotspot" onclick="openHarperInfo()" style="position:absolute;top:49.5%;left:61%;width:36%;height:3%;" aria-label="Find out more"></div>
       </div>`;
   }
   else if (browserPage === "harper-basket") {
@@ -964,7 +1280,7 @@ function getHFSidebar() {
     <div class="hfc-sc">
       <div style="font-size:16px;font-weight:600;color:#111;margin-bottom:14px">Your Selection</div>
       <div style="display:flex;align-items:flex-start;gap:12px;padding-bottom:14px;border-bottom:0.5px solid #e5e5e5">
-        <div style="width:64px;height:80px;background:#f0ede8;border-radius:3px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:26px">&#x1F457;</div>
+        <img src="https://stuart-ford.github.io/boden-study/images/checkout-thumbnail.png" style="width:64px;height:80px;object-fit:cover;border-radius:3px;flex-shrink:0;display:block;">
         <div style="flex:1;min-width:0">
           <div style="font-size:14px;font-weight:500;color:#111;margin-bottom:3px">Scoop Neck Jacquard Dress</div>
           <div style="font-size:13px;color:#888">14</div>
@@ -1308,7 +1624,7 @@ function getHarperCheckoutHTML() {
 
 function hfRender() {
   const c = document.getElementById('browser-content');
-  if (c) { c.innerHTML = getHarperCheckoutHTML(); c.scrollTop = 0; }
+  if (c) { c.innerHTML = getHarperCheckoutHTML(); if (window.innerWidth >= 1024) c.scrollTop = 0; }
 }
 
 function hfNextStep() {
@@ -1486,7 +1802,17 @@ function hfSelectAddress(addr) {
 function resetPrototype() {
   inboxMode = 'default';
   notificationsTriggered = false;
-  emails = EMAILS_SOURCE.map(e => ({...e}));
+  studyDay = 0;
+  studyTick = 1;
+  pendingSmsThreadId = null;
+  emails = buildEmailsSource();
+  // Reset Harper SMS thread
+  const ht = THREADS.find(t => t.harperThread);
+  if (ht) { ht.msgs = []; ht.last = ''; ht.time = ''; ht.unread = 0; }
+  renderSmsList();
+  // Hide SMS notification if showing
+  const smsNotif = document.getElementById('notif-harper-sms');
+  if (smsNotif) smsNotif.classList.remove('show');
   browserPage = 'boden-pdp';
   browserHistory = [];
   closeMiniBag();
@@ -1496,12 +1822,13 @@ function resetPrototype() {
   // Clear desktop email right panel if it exists
   const rp = document.getElementById('mail-right-content');
   if (rp) rp.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:300px;color:#ccc;font-size:14px;font-family:system-ui">Select an email to read</div>';
-  const notifIds = ['notif-harper', 'notif-boden'];
+  const notifIds = ['notif-harper', 'notif-boden', 'notif-new-email'];
   notifIds.forEach(id => document.getElementById(id).classList.remove('show'));
   document.getElementById('admin-all-toggle').checked = false;
   renderMailList();
   renderBrowserPage();
   updateAdminStatus();
+  updateFastForwardBtn();
   go('home');
 }
 
@@ -1513,6 +1840,7 @@ function toggleAllEmails(checked) {
   }
   renderMailList();
   updateAdminStatus();
+  updateFastForwardBtn();
 }
 
 function updateAdminStatus() {
@@ -1522,6 +1850,7 @@ function updateAdminStatus() {
   set('st-notif', notificationsTriggered ? 'triggered' : 'not triggered');
   set('st-browser', browserPage);
   set('st-emails', `${visible.length} visible (${visible.filter(e=>e.unread).length} unread)`);
+  set('st-day', studyDay === 0 ? 'pre-order' : 'Day ' + studyDay + ' (tick ' + studyTick + '/' + TICK_MAX + ')');
 }
 
 /* ── Init ── */
@@ -1535,6 +1864,7 @@ if (mbSummary)  mbSummary.src  = IMG + "Mini%20Bag%20Order%20Summary%20-%20Mobil
 if (mbDesktop)  mbDesktop.src  = IMG + "Mini-Bag-Panel-Desktop.png";
 if (mbSummaryD) mbSummaryD.src = IMG + "Mini%20Bag%20Order%20Summary%20-%20Desktop.png";
 updateFloatHome();
+updateFastForwardBtn();
 renderMailList();
 renderSmsList();
 renderBrowserPage();

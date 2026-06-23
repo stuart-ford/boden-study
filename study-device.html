@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Study Device</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+
+  :root {
+    --blue:   #1a73e8;
+    --green:  #1e9e50;
+    --orange: #e65100;
+    --red:    #ef4444;
+    --sf: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    --safe-top:    env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left:   env(safe-area-inset-left, 0px);
+    --safe-right:  env(safe-area-inset-right, 0px);
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    font-family: var(--sf);
+    -webkit-font-smoothing: antialiased;
+    background: #16162a;
+  }
+
+  #app {
+    width: 100%;
+    height: 100dvh;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.18s ease;
+    overflow: hidden;
+  }
+  .screen.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* ── HOME SCREEN ── */
+  #home {
+    background: #16162a;
+    padding-top: calc(var(--safe-top) + 14px);
+    padding-bottom: calc(var(--safe-bottom) + 10px);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+  .home-clock { text-align: center; padding: 24px 0 32px; flex-shrink: 0; }
+  .home-date { font-size: 13px; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+  .home-time { font-size: clamp(52px, 14vw, 72px); font-weight: 200; color: #fff; letter-spacing: -0.04em; line-height: 1; }
+  .app-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px 8px; padding: 0 20px; flex-shrink: 0; }
+  .app-icon-wrap { display: flex; flex-direction: column; align-items: center; gap: 7px; background: none; border: none; cursor: pointer; padding: 4px 0; }
+  .app-icon-wrap.disabled { opacity: 0.28; pointer-events: none; }
+  .app-icon { width: clamp(54px, 14vw, 64px); height: clamp(54px, 14vw, 64px); border-radius: 17px; display: flex; align-items: center; justify-content: center; font-size: clamp(24px, 6vw, 30px); position: relative; }
+  .app-label { font-size: 11px; color: rgba(255,255,255,0.8); text-align: center; line-height: 1.2; }
+  .badge { position: absolute; top: -5px; right: -5px; background: var(--red); color: #fff; font-size: 10px; font-weight: 800; min-width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #16162a; padding: 0 4px; line-height: 1; }
+  .home-bar { margin-top: auto; display: flex; justify-content: center; padding: 12px 0 4px; }
+  .home-bar-pill { width: 120px; height: 5px; background: rgba(255,255,255,0.22); border-radius: 3px; }
+
+  /* ── APP SCREENS ── */
+  .app-screen {
+    background: #fff;
+    padding-top: calc(var(--safe-top) + 0px);
+    padding-left: var(--safe-left);
+    padding-right: var(--safe-right);
+  }
+
+  .nav-bar { display: flex; align-items: center; gap: 8px; padding: 12px 16px 11px; border-bottom: 0.5px solid #ebebeb; flex-shrink: 0; background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  .nav-back { background: none; border: none; cursor: pointer; font-size: 15px; display: flex; align-items: center; gap: 2px; padding: 6px 8px 6px 0; min-width: 48px; min-height: 44px; color: var(--blue); font-family: var(--sf); }
+  .nav-back.green { color: var(--green); }
+  .nav-back.orange { color: var(--orange); }
+  .nav-title { font-size: 18px; font-weight: 700; color: #111; flex: 1; }
+  .nav-sub { font-size: 12px; color: var(--blue); }
+
+  .scroll-area { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+
+  /* ── MAIL LIST ── */
+  .mail-row { display: flex; padding: 13px 16px; border-bottom: 0.5px solid #f0f0f0; gap: 12px; align-items: flex-start; background: #fff; cursor: pointer; width: 100%; border: none; text-align: left; min-height: 72px; }
+  .mail-row.unread { background: #f0f6ff; }
+  .mail-avatar { width: 42px; height: 42px; border-radius: 21px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 700; flex-shrink: 0; background: #e0e0e0; color: #777; font-family: var(--sf); }
+  .mail-avatar.unread { background: var(--blue); color: #fff; }
+  .mail-meta { flex: 1; min-width: 0; }
+  .mail-from-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3px; }
+  .mail-from { font-size: 15px; color: #111; font-weight: 400; font-family: var(--sf); }
+  .mail-from.unread { font-weight: 700; }
+  .mail-time { font-size: 12px; color: #aaa; flex-shrink: 0; margin-left: 8px; font-family: var(--sf); }
+  .mail-subject { font-size: 14px; color: #222; font-weight: 400; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 2px; font-family: var(--sf); }
+  .mail-subject.unread { font-weight: 600; }
+  .mail-preview { font-size: 13px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--sf); }
+  .unread-dot { width: 9px; height: 9px; border-radius: 5px; background: var(--blue); flex-shrink: 0; margin-top: 10px; }
+
+  /* ── EMAIL DETAIL ── */
+  .email-header { padding: 14px 16px 16px; border-bottom: 0.5px solid #ebebeb; flex-shrink: 0; }
+  .email-back { background: none; border: none; cursor: pointer; color: var(--blue); font-size: 15px; padding: 6px 0; display: flex; align-items: center; gap: 3px; min-height: 44px; margin-bottom: 12px; font-family: var(--sf); }
+  .email-subject { font-size: 18px; font-weight: 700; color: #111; line-height: 1.35; margin-bottom: 14px; font-family: var(--sf); }
+  .email-sender-row { display: flex; align-items: center; gap: 10px; }
+  .email-avatar-sm { width: 38px; height: 38px; border-radius: 19px; background: #e0e0e0; color: #666; font-size: 15px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--sf); }
+  .email-sender-name { font-size: 14px; font-weight: 600; color: #111; margin-bottom: 1px; font-family: var(--sf); }
+  .email-sender-addr { font-size: 12px; color: #aaa; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--sf); }
+  .email-date { font-size: 12px; color: #aaa; flex-shrink: 0; margin-left: auto; font-family: var(--sf); }
+  .email-body { flex: 1; }
+  .email-body img { width: 100%; display: block; }
+  .email-body p { padding: 18px 16px 0; font-size: 15px; color: #333; line-height: 1.7; margin-bottom: 6px; font-family: var(--sf); }
+
+  /* ── SMS LIST ── */
+  .sms-row { display: flex; padding: 13px 16px; border-bottom: 0.5px solid #f0f0f0; gap: 12px; align-items: center; background: #fff; cursor: pointer; width: 100%; border: none; text-align: left; min-height: 72px; }
+  .sms-row.unread { background: #f0fff5; }
+  .sms-avatar { width: 48px; height: 48px; border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 19px; font-weight: 700; flex-shrink: 0; background: #e0e0e0; color: #777; font-family: var(--sf); }
+  .sms-avatar.unread { background: var(--green); color: #fff; }
+  .sms-name { font-size: 16px; font-weight: 500; color: #111; font-family: var(--sf); }
+  .sms-name.unread { font-weight: 700; }
+  .sms-last { font-size: 14px; color: #aaa; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-family: var(--sf); }
+  .sms-last.unread { color: #333; font-weight: 500; }
+  .sms-time { font-size: 12px; color: #aaa; flex-shrink: 0; margin-left: auto; align-self: flex-start; padding-top: 2px; font-family: var(--sf); }
+  .sms-badge { width: 22px; height: 22px; border-radius: 11px; background: var(--green); color: #fff; font-size: 12px; font-weight: 800; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--sf); }
+
+  /* ── SMS THREAD ── */
+  #sms-view { background: #f2f2f2; }
+  .thread-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #fff; border-bottom: 0.5px solid #ebebeb; flex-shrink: 0; }
+  .thread-back { background: none; border: none; cursor: pointer; color: var(--green); font-size: 15px; display: flex; align-items: center; gap: 2px; padding: 6px 8px 6px 0; min-height: 44px; min-width: 44px; font-family: var(--sf); }
+  .thread-avatar { width: 34px; height: 34px; border-radius: 17px; background: #e0e0e0; color: #666; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-family: var(--sf); }
+  .thread-name { font-size: 16px; font-weight: 600; color: #111; font-family: var(--sf); }
+  .bubbles { padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+  .bubble-wrap { display: flex; flex-direction: column; }
+  .bubble-wrap.me { align-items: flex-end; }
+  .bubble-wrap.them { align-items: flex-start; }
+  .bubble { max-width: 78%; padding: 11px 15px; font-size: 15px; line-height: 1.5; border-radius: 20px; font-family: var(--sf); }
+  .bubble.me { background: var(--green); color: #fff; border-bottom-right-radius: 5px; }
+  .bubble.them { background: #fff; color: #111; border-bottom-left-radius: 5px; }
+  .bubble-time { font-size: 11px; color: #aaa; margin-top: 4px; padding: 0 4px; font-family: var(--sf); }
+  .thread-input-bar { display: flex; gap: 8px; align-items: center; padding: 8px 14px calc(var(--safe-bottom) + 8px); background: #fff; border-top: 0.5px solid #e5e5e5; flex-shrink: 0; }
+  .thread-input-field { flex: 1; background: #f5f5f5; border-radius: 22px; padding: 10px 16px; font-size: 15px; color: #bbb; border: 0.5px solid #e5e5e5; font-family: var(--sf); }
+  .thread-send { width: 38px; height: 38px; border-radius: 19px; background: var(--green); color: #fff; font-size: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; border: none; cursor: pointer; }
+
+  /* ── BROWSER ── */
+  .browser-bar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 0.5px solid #ebebeb; flex-shrink: 0; }
+  .browser-back { background: none; border: none; cursor: pointer; color: var(--orange); font-size: 15px; min-height: 44px; min-width: 44px; display: flex; align-items: center; font-family: var(--sf); }
+  .browser-input { flex: 1; background: #f5f5f5; border-radius: 11px; padding: 9px 13px; display: flex; align-items: center; gap: 7px; border: 0.5px solid #e5e5e5; }
+  .browser-input-text { font-size: 14px; color: #aaa; flex: 1; font-family: var(--sf); }
+  .favs-label { font-size: 11px; color: #bbb; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; padding: 22px 20px 14px; font-family: var(--sf); }
+  .favs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 20px 28px; }
+  .fav-item { display: flex; flex-direction: column; align-items: center; gap: 7px; }
+  .fav-icon { width: 56px; height: 56px; border-radius: 15px; display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .fav-label { font-size: 11px; color: #666; text-align: center; font-family: var(--sf); }
+  .browser-empty { margin: 0 20px; padding: 18px; background: #f9f9f9; border-radius: 16px; border: 0.5px solid #e5e5e5; }
+  .browser-empty-title { font-size: 15px; font-weight: 600; color: #333; margin-bottom: 5px; font-family: var(--sf); }
+  .browser-empty-sub { font-size: 13px; color: #aaa; font-family: var(--sf); }
+
+  /* ── Loading state for images ── */
+  .img-loading { display: flex; align-items: center; justify-content: center; padding: 40px 20px; color: #aaa; font-size: 14px; font-family: var(--sf); }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="home">
+    <div class="home-clock">
+      <div class="home-date" id="home-date"></div>
+      <div class="home-time" id="home-time"></div>
+    </div>
+    <div class="app-grid">
+      <button class="app-icon-wrap" onclick="go('mail')">
+        <div class="app-icon" style="background:#1a73e8">
+          ✉️
+          <div class="badge" id="mail-badge">6</div>
+        </div>
+        <span class="app-label">Mail</span>
+      </button>
+      <button class="app-icon-wrap" onclick="go('sms')">
+        <div class="app-icon" style="background:#1e9e50">
+          💬
+          <div class="badge" id="sms-badge">1</div>
+        </div>
+        <span class="app-label">Messages</span>
+      </button>
+      <button class="app-icon-wrap" onclick="go('browser')">
+        <div class="app-icon" style="background:#e65100">🌐</div>
+        <span class="app-label">Browser</span>
+      </button>
+      <button class="app-icon-wrap disabled">
+        <div class="app-icon" style="background:#7c3aed">📷</div>
+        <span class="app-label">Camera</span>
+      </button>
+      <button class="app-icon-wrap disabled">
+        <div class="app-icon" style="background:#db2777">🖼</div>
+        <span class="app-label">Photos</span>
+      </button>
+      <button class="app-icon-wrap disabled">
+        <div class="app-icon" style="background:#0891b2">📍</div>
+        <span class="app-label">Maps</span>
+      </button>
+      <button class="app-icon-wrap disabled">
+        <div class="app-icon" style="background:#dc2626">📅</div>
+        <span class="app-label">Calendar</span>
+      </button>
+      <button class="app-icon-wrap disabled">
+        <div class="app-icon" style="background:#475569">⚙️</div>
+        <span class="app-label">Settings</span>
+      </button>
+    </div>
+    <div class="home-bar"><div class="home-bar-pill"></div></div>
+  </div>
+
+  <!-- MAIL INBOX -->
+  <div class="screen app-screen" id="mail">
+    <div class="nav-bar">
+      <button class="nav-back" onclick="go('home')">‹ Home</button>
+      <div class="nav-title">Inbox</div>
+      <div class="nav-sub" id="mail-unread-label"></div>
+    </div>
+    <div class="scroll-area" id="mail-list"></div>
+  </div>
+
+  <!-- EMAIL DETAIL -->
+  <div class="screen app-screen" id="email-view">
+    <div class="email-header">
+      <button class="email-back" onclick="go('mail')">‹ Inbox</button>
+      <div class="email-subject" id="ev-subject"></div>
+      <div class="email-sender-row">
+        <div class="email-avatar-sm" id="ev-avatar"></div>
+        <div style="flex:1;min-width:0">
+          <div class="email-sender-name" id="ev-name"></div>
+          <div class="email-sender-addr" id="ev-addr"></div>
+        </div>
+        <div class="email-date" id="ev-date"></div>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <div class="email-body" id="ev-body"></div>
+    </div>
+  </div>
+
+  <!-- SMS LIST -->
+  <div class="screen app-screen" id="sms">
+    <div class="nav-bar">
+      <button class="nav-back green" onclick="go('home')">‹ Home</button>
+      <div class="nav-title">Messages</div>
+    </div>
+    <div class="scroll-area" id="sms-list"></div>
+  </div>
+
+  <!-- SMS THREAD -->
+  <div class="screen app-screen" id="sms-view" style="background:#f2f2f2">
+    <div class="thread-header">
+      <button class="thread-back" onclick="go('sms')">‹ Back</button>
+      <div class="thread-avatar" id="tv-avatar"></div>
+      <div class="thread-name" id="tv-name"></div>
+    </div>
+    <div class="scroll-area">
+      <div class="bubbles" id="tv-bubbles"></div>
+    </div>
+    <div class="thread-input-bar">
+      <div class="thread-input-field">Message</div>
+      <button class="thread-send">↑</button>
+    </div>
+  </div>
+
+  <!-- BROWSER -->
+  <div class="screen app-screen" id="browser">
+    <div class="browser-bar">
+      <button class="browser-back" onclick="go('home')">‹ Home</button>
+      <div class="browser-input">
+        <span style="font-size:13px;color:#bbb">🔒</span>
+        <span class="browser-input-text">Search or enter website</span>
+      </div>
+    </div>
+    <div class="scroll-area">
+      <div class="favs-label">Favourites</div>
+      <div class="favs-grid">
+        <div class="fav-item"><div class="fav-icon" style="background:#1a5c38">🛍️</div><span class="fav-label">Boden</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#1a73e8">🔍</div><span class="fav-label">Google</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#111">📰</div><span class="fav-label">BBC News</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#e53935">▶️</div><span class="fav-label">YouTube</span></div>
+      </div>
+      <div class="browser-empty">
+        <div class="browser-empty-title">New tab</div>
+        <div class="browser-empty-sub">Pages you visit won't appear in your browsing history</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const IMG = "https://stuart-ford.github.io/boden-study/images/";
+
+const EMAILS = [
+  {
+    id: 1,
+    from: "Harper Try Before You Buy",
+    addr: "noreply@harperconcierge.com",
+    subject: "Your Boden try on period has ended",
+    preview: "Your try on period has now ended. We hope you enjoyed the service.",
+    time: "Today",
+    unread: true,
+    image: IMG + "harper-payment-nothing-kept.png"
+  },
+  {
+    id: 2,
+    from: "Harper Try Before You Buy",
+    addr: "noreply@harperconcierge.com",
+    subject: "Your try on period ends tomorrow for Boden order (UK1234567)",
+    preview: "A gentle reminder that your try on period ends at midnight tomorrow.",
+    time: "Yesterday",
+    unread: true,
+    image: IMG + "harper-try-on-ends-tomorrow.png"
+  },
+  {
+    id: 3,
+    from: "Harper Try Before You Buy",
+    addr: "noreply@harperconcierge.com",
+    subject: "Your try on period has started for Boden order (UK1234567)",
+    preview: "Your pieces have arrived and your try on period has started.",
+    time: "Mon",
+    unread: true,
+    image: IMG + "harper-try-on-started.png"
+  },
+  {
+    id: 4,
+    from: "Boden",
+    addr: "orders@boden.co.uk",
+    subject: "Your Try Before You Buy order (UK1234567) has been shipped",
+    preview: "Your BODEN order is on its way. We've handed it to our delivery partner.",
+    time: "Sun",
+    unread: true,
+    image: IMG + "boden-shipping.png"
+  },
+  {
+    id: 5,
+    from: "Harper Try Before You Buy",
+    addr: "noreply@harperconcierge.com",
+    subject: "Your Boden Try Before You Buy order (UK1234567) confirmation",
+    preview: "Your Boden Try Before You Buy order is confirmed. Your 7 day try on period will begin once your pieces arrive.",
+    time: "Sat",
+    unread: true,
+    image: IMG + "harper-order-confirmed.png"
+  },
+  {
+    id: 6,
+    from: "Boden",
+    addr: "orders@boden.co.uk",
+    subject: "Thank you for your Try Before You Buy order (UK1234567)",
+    preview: "Thank you for choosing BODEN. We've received your order and we'll be in touch when it's on its way.",
+    time: "Sat",
+    unread: true,
+    image: IMG + "boden-order-confirmed.png"
+  }
+];
+
+const THREADS = [
+  {
+    id: 1, name: "Mum", avatar: "M", time: "Sun", unread: 0,
+    last: "Perfect, see you then!",
+    msgs: [
+      { me: false, text: "Are you free Sunday for lunch?", t: "Sun 11:02" },
+      { me: true,  text: "Yes that sounds lovely, what time?", t: "Sun 11:15" },
+      { me: false, text: "Come for 1pm, I'll do a roast 😊", t: "Sun 11:18" },
+      { me: true,  text: "Perfect, see you then!", t: "Sun 11:20" },
+    ]
+  },
+  {
+    id: 2, name: "Tom Briggs", avatar: "T", time: "Yesterday", unread: 1,
+    last: "No rush, just let me know when you get a chance",
+    msgs: [
+      { me: false, text: "Hey, did you manage to look at that doc I sent?", t: "Yesterday 16:30" },
+      { me: true,  text: "Not yet, I'll do it tonight", t: "Yesterday 17:05" },
+      { me: false, text: "No rush, just let me know when you get a chance", t: "Yesterday 17:08" },
+    ]
+  },
+  {
+    id: 3, name: "Deliveroo", avatar: "D", time: "Tue", unread: 0,
+    last: "Your rider is nearby — arriving in 5 mins",
+    msgs: [
+      { me: false, text: "Your order from Honest Burgers is on its way! Estimated arrival: 8:45pm", t: "Tue 20:31" },
+      { me: false, text: "Your rider is nearby — arriving in 5 mins", t: "Tue 20:40" },
+    ]
+  }
+];
+
+/* ── Clock ── */
+function updateClock() {
+  const now = new Date();
+  const hh = now.getHours().toString().padStart(2, "0");
+  const mm = now.getMinutes().toString().padStart(2, "0");
+  document.getElementById("home-time").textContent = `${hh}:${mm}`;
+  const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+  const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  document.getElementById("home-date").textContent =
+    `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
+}
+updateClock();
+setInterval(updateClock, 15000);
+
+/* ── Navigation ── */
+let currentScreen = "home";
+function go(screenId) {
+  document.getElementById(currentScreen).classList.remove("active");
+  document.getElementById(screenId).classList.add("active");
+  currentScreen = screenId;
+  if (screenId !== "home" && screenId !== "email-view" && screenId !== "sms-view") {
+    document.getElementById(screenId).querySelector(".scroll-area").scrollTop = 0;
+  }
+}
+
+/* ── Mail ── */
+let emails = EMAILS.map(e => ({ ...e }));
+
+function renderMailList() {
+  const ul = document.getElementById("mail-list");
+  ul.innerHTML = "";
+  const unread = emails.filter(e => e.unread).length;
+
+  const label = document.getElementById("mail-unread-label");
+  label.textContent = unread > 0 ? `${unread} unread` : "";
+
+  const badge = document.getElementById("mail-badge");
+  if (unread > 0) { badge.textContent = unread; badge.style.display = "flex"; }
+  else { badge.style.display = "none"; }
+
+  emails.forEach(e => {
+    const btn = document.createElement("button");
+    btn.className = "mail-row" + (e.unread ? " unread" : "");
+    btn.innerHTML = `
+      <div class="mail-avatar${e.unread ? " unread" : ""}">${e.from[0]}</div>
+      <div class="mail-meta">
+        <div class="mail-from-row">
+          <span class="mail-from${e.unread ? " unread" : ""}">${e.from}</span>
+          <span class="mail-time">${e.time}</span>
+        </div>
+        <div class="mail-subject${e.unread ? " unread" : ""}">${e.subject}</div>
+        <div class="mail-preview">${e.preview}</div>
+      </div>
+      ${e.unread ? '<div class="unread-dot"></div>' : ""}
+    `;
+    btn.onclick = () => openEmail(e.id);
+    ul.appendChild(btn);
+  });
+}
+
+function openEmail(id) {
+  const e = emails.find(x => x.id === id);
+  if (!e) return;
+  e.unread = false;
+  renderMailList();
+
+  document.getElementById("ev-subject").textContent = e.subject;
+  document.getElementById("ev-avatar").textContent = e.from[0];
+  document.getElementById("ev-name").textContent = e.from;
+  document.getElementById("ev-addr").textContent = e.addr;
+  document.getElementById("ev-date").textContent = e.time;
+
+  const body = document.getElementById("ev-body");
+  body.innerHTML = "";
+
+  if (e.image) {
+    const loading = document.createElement("div");
+    loading.className = "img-loading";
+    loading.textContent = "Loading…";
+    body.appendChild(loading);
+
+    const img = document.createElement("img");
+    img.alt = e.subject;
+    img.onload = () => { body.innerHTML = ""; body.appendChild(img); };
+    img.onerror = () => { loading.textContent = "Could not load email image."; };
+    img.src = e.image;
+  }
+
+  go("email-view");
+  document.getElementById("email-view").querySelector(".scroll-area").scrollTop = 0;
+}
+
+/* ── SMS ── */
+function renderSmsList() {
+  const ul = document.getElementById("sms-list");
+  ul.innerHTML = "";
+  const totalUnread = THREADS.reduce((n, t) => n + t.unread, 0);
+  const smsBadge = document.getElementById("sms-badge");
+  if (totalUnread > 0) { smsBadge.textContent = totalUnread; smsBadge.style.display = "flex"; }
+  else { smsBadge.style.display = "none"; }
+
+  THREADS.forEach(t => {
+    const btn = document.createElement("button");
+    btn.className = "sms-row" + (t.unread ? " unread" : "");
+    btn.innerHTML = `
+      <div class="sms-avatar${t.unread ? " unread" : ""}">${t.avatar}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">
+          <span class="sms-name${t.unread ? " unread" : ""}">${t.name}</span>
+          <span class="sms-time">${t.time}</span>
+        </div>
+        <div class="sms-last${t.unread ? " unread" : ""}">${t.last}</div>
+      </div>
+      ${t.unread > 0 ? `<div class="sms-badge">${t.unread}</div>` : ""}
+    `;
+    btn.onclick = () => openThread(t.id);
+    ul.appendChild(btn);
+  });
+}
+
+function openThread(id) {
+  const t = THREADS.find(x => x.id === id);
+  if (!t) return;
+  document.getElementById("tv-avatar").textContent = t.avatar;
+  document.getElementById("tv-name").textContent = t.name;
+
+  const container = document.getElementById("tv-bubbles");
+  container.innerHTML = "";
+  t.msgs.forEach(m => {
+    const wrap = document.createElement("div");
+    wrap.className = "bubble-wrap " + (m.me ? "me" : "them");
+    const bub = document.createElement("div");
+    bub.className = "bubble " + (m.me ? "me" : "them");
+    bub.textContent = m.text;
+    const ts = document.createElement("div");
+    ts.className = "bubble-time";
+    ts.textContent = m.t;
+    wrap.appendChild(bub);
+    wrap.appendChild(ts);
+    container.appendChild(wrap);
+  });
+
+  go("sms-view");
+  setTimeout(() => {
+    const sa = document.querySelector("#sms-view .scroll-area");
+    if (sa) sa.scrollTop = sa.scrollHeight;
+  }, 50);
+}
+
+/* ── Init ── */
+renderMailList();
+renderSmsList();
+</script>
+</body>
+</html>

@@ -8,24 +8,15 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>Study Device</title>
 <style>
-  *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
-
+  *, *::before, *::after { box-sizing:border-box; -webkit-tap-highlight-color:transparent; margin:0; padding:0; }
   :root {
-    --blue:   #1a73e8;
-    --green:  #1e9e50;
-    --orange: #e65100;
-    --red:    #ef4444;
-    --sf: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-    --safe-top:    env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left:   env(safe-area-inset-left, 0px);
-    --safe-right:  env(safe-area-inset-right, 0px);
+    --blue:#1a73e8; --green:#1e9e50; --orange:#e65100; --red:#ef4444;
+    --sf:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;
+    --safe-top:env(safe-area-inset-top,0px); --safe-bottom:env(safe-area-inset-bottom,0px);
+    --safe-left:env(safe-area-inset-left,0px); --safe-right:env(safe-area-inset-right,0px);
   }
-
-  html, body { width:100%; height:100%; overflow:hidden; font-family:var(--sf); -webkit-font-smoothing:antialiased; background:#16162a; }
-
+  html,body { width:100%; height:100%; overflow:hidden; font-family:var(--sf); -webkit-font-smoothing:antialiased; background:#16162a; }
   #app { width:100%; height:100dvh; height:100vh; display:flex; flex-direction:column; overflow:hidden; position:relative; }
-
   .screen { position:absolute; inset:0; display:flex; flex-direction:column; opacity:0; pointer-events:none; transition:opacity 0.18s ease; overflow:hidden; }
   .screen.active { opacity:1; pointer-events:all; }
 
@@ -45,16 +36,14 @@
 
   /* ── APP SCREENS ── */
   .app-screen { background:#fff; padding-top:calc(var(--safe-top) + 0px); padding-left:var(--safe-left); padding-right:var(--safe-right); }
-
   .nav-bar { display:flex; align-items:center; gap:8px; padding:12px 16px 11px; border-bottom:0.5px solid #ebebeb; flex-shrink:0; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); }
   .nav-back { background:none; border:none; cursor:pointer; font-size:15px; display:flex; align-items:center; gap:2px; padding:6px 8px 6px 0; min-width:48px; min-height:44px; color:var(--blue); font-family:var(--sf); }
   .nav-back.green { color:var(--green); }
   .nav-title { font-size:18px; font-weight:700; color:#111; flex:1; }
   .nav-sub { font-size:12px; color:var(--blue); }
-
   .scroll-area { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; overscroll-behavior:contain; }
 
-  /* ── MAIL LIST ── */
+  /* ── MAIL ── */
   .mail-row { display:flex; padding:13px 16px; border-bottom:0.5px solid #f0f0f0; gap:12px; align-items:flex-start; background:#fff; cursor:pointer; width:100%; border:none; text-align:left; min-height:72px; }
   .mail-row.unread { background:#f0f6ff; }
   .mail-avatar { width:42px; height:42px; border-radius:21px; display:flex; align-items:center; justify-content:center; font-size:17px; font-weight:700; flex-shrink:0; background:#e0e0e0; color:#777; }
@@ -80,9 +69,10 @@
   .email-date { font-size:12px; color:#aaa; flex-shrink:0; margin-left:auto; }
   .email-body { flex:1; }
   .email-body img { width:100%; display:block; }
+  .email-body p { padding:18px 16px 0; font-size:15px; color:#333; line-height:1.7; margin-bottom:6px; }
   .img-loading { display:flex; align-items:center; justify-content:center; padding:40px 20px; color:#aaa; font-size:14px; }
 
-  /* ── SMS LIST ── */
+  /* ── SMS ── */
   .sms-row { display:flex; padding:13px 16px; border-bottom:0.5px solid #f0f0f0; gap:12px; align-items:center; background:#fff; cursor:pointer; width:100%; border:none; text-align:left; min-height:72px; }
   .sms-row.unread { background:#f0fff5; }
   .sms-avatar { width:48px; height:48px; border-radius:24px; display:flex; align-items:center; justify-content:center; font-size:19px; font-weight:700; flex-shrink:0; background:#e0e0e0; color:#777; }
@@ -93,8 +83,6 @@
   .sms-last.unread { color:#333; font-weight:500; }
   .sms-time { font-size:12px; color:#aaa; flex-shrink:0; margin-left:auto; align-self:flex-start; padding-top:2px; }
   .sms-badge { width:22px; height:22px; border-radius:11px; background:var(--green); color:#fff; font-size:12px; font-weight:800; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-
-  /* ── SMS THREAD ── */
   #sms-view { background:#f2f2f2; }
   .thread-header { display:flex; align-items:center; gap:10px; padding:12px 16px; background:#fff; border-bottom:0.5px solid #ebebeb; flex-shrink:0; }
   .thread-back { background:none; border:none; cursor:pointer; color:var(--green); font-size:15px; display:flex; align-items:center; padding:6px 8px 6px 0; min-height:44px; min-width:44px; }
@@ -102,8 +90,7 @@
   .thread-name { font-size:16px; font-weight:600; color:#111; }
   .bubbles { padding:14px; display:flex; flex-direction:column; gap:10px; }
   .bubble-wrap { display:flex; flex-direction:column; }
-  .bubble-wrap.me { align-items:flex-end; }
-  .bubble-wrap.them { align-items:flex-start; }
+  .bubble-wrap.me { align-items:flex-end; } .bubble-wrap.them { align-items:flex-start; }
   .bubble { max-width:78%; padding:11px 15px; font-size:15px; line-height:1.5; border-radius:20px; }
   .bubble.me { background:var(--green); color:#fff; border-bottom-right-radius:5px; }
   .bubble.them { background:#fff; color:#111; border-bottom-left-radius:5px; }
@@ -114,7 +101,7 @@
 
   /* ── BROWSER ── */
   .browser-bar { display:flex; align-items:center; gap:10px; padding:10px 14px; border-bottom:0.5px solid #ebebeb; flex-shrink:0; background:#fff; }
-  .browser-back-btn { background:none; border:none; cursor:pointer; color:var(--orange); font-size:22px; min-height:44px; min-width:36px; display:flex; align-items:center; justify-content:center; padding:0; line-height:1; transition:opacity 0.15s; }
+  .browser-back-btn { background:none; border:none; cursor:pointer; color:var(--orange); font-size:22px; min-height:44px; min-width:36px; display:flex; align-items:center; justify-content:center; padding:0; transition:opacity 0.15s; }
   .browser-back-btn:disabled { opacity:0.25; cursor:default; }
   .browser-input { flex:1; background:#f5f5f5; border-radius:11px; padding:9px 13px; display:flex; align-items:center; gap:7px; border:0.5px solid #e5e5e5; }
   .browser-url-text { font-size:14px; color:#aaa; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
@@ -126,15 +113,98 @@
   .browser-new-tab { margin:0 20px; padding:18px; background:#f9f9f9; border-radius:16px; border:0.5px solid #e5e5e5; }
   .browser-new-tab-title { font-size:15px; font-weight:600; color:#333; margin-bottom:5px; }
   .browser-new-tab-sub { font-size:13px; color:#aaa; }
-
-  /* ── HOTSPOT ── */
   .hotspot { position:absolute; cursor:pointer; background:transparent; -webkit-tap-highlight-color:transparent; }
+
+  /* ── HARPER FORM ── */
+  .hf-page { background:#fff; font-family:var(--sf); padding-bottom:32px; }
+  .hf-header { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 12px; border-bottom:0.5px solid #e5e5e5; }
+  .hf-logo { font-size:19px; font-weight:900; color:#1a5c38; letter-spacing:0.1em; }
+  .hf-powered { font-size:12px; color:#888; }
+  .hf-powered em { font-style:italic; font-weight:500; }
+  .hf-hero { padding:16px; border-bottom:0.5px solid #e5e5e5; }
+  .hf-hero h1 { font-size:20px; font-weight:700; color:#111; margin-bottom:4px; }
+  .hf-hero-sub { font-size:13px; color:#666; margin-bottom:12px; }
+  .hf-benefits { display:flex; flex-direction:column; gap:8px; }
+  .hf-benefit { display:flex; align-items:center; gap:8px; font-size:13px; color:#333; }
+  .hf-section { padding:16px; border-bottom:0.5px solid #e5e5e5; }
+  .hf-section-title { font-size:16px; font-weight:600; color:#111; margin-bottom:14px; }
+  .hf-section-header { display:flex; justify-content:space-between; align-items:center; cursor:pointer; }
+  .hf-count { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:10px; background:#e8e8e8; font-size:12px; font-weight:600; margin-left:6px; }
+  .hf-chevron { font-size:18px; color:#555; transition:transform 0.2s; }
+  .hf-selection-body { margin-top:12px; }
+  .hf-item { padding:10px 0; border-bottom:0.5px solid #f0f0f0; }
+  .hf-item:last-child { border-bottom:none; }
+  .hf-item-name { font-size:14px; font-weight:500; color:#111; margin-bottom:2px; }
+  .hf-item-meta { font-size:12px; color:#888; margin-bottom:2px; }
+  .hf-item-price { font-size:14px; color:#111; }
+  .hf-field { margin-bottom:10px; position:relative; }
+  .hf-input { width:100%; padding:12px 14px; border:1px solid #d5d5d5; border-radius:4px; font-size:15px; font-family:var(--sf); color:#111; background:#fff; -webkit-appearance:none; appearance:none; box-sizing:border-box; }
+  .hf-input:focus { outline:none; border-color:#1a5c38; box-shadow:0 0 0 2px rgba(26,92,56,0.1); }
+  .hf-input::placeholder { color:#bbb; }
+  .hf-input-with-icon { padding-right:40px; }
+  .hf-field-suffix { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:#aaa; font-size:15px; pointer-events:none; }
+  .hf-phone-row { display:flex; }
+  .hf-phone-prefix { padding:12px 10px; border:1px solid #d5d5d5; border-right:none; border-radius:4px 0 0 4px; font-size:13px; color:#333; background:#f7f7f7; white-space:nowrap; display:flex; align-items:center; gap:5px; flex-shrink:0; }
+  .hf-input-phone { border-radius:0 4px 4px 0; flex:1; }
+  .hf-link { color:#1a5c38; text-decoration:underline; font-size:inherit; cursor:pointer; }
+  .hf-manual-link { display:inline-block; font-size:13px; margin:4px 0 10px; }
+  .hf-service-card { border:1.5px solid #111; border-radius:4px; padding:14px; }
+  .hf-checklist { display:flex; flex-direction:column; gap:5px; padding-left:28px; margin:10px 0; }
+  .hf-check-item { font-size:13px; color:#333; }
+  .hf-delivery-option { display:flex; align-items:center; gap:10px; padding:11px 12px; border:1px solid #d5d5d5; border-radius:4px; margin-top:8px; cursor:pointer; }
+  .hf-delivery-selected { border:2px solid #111; }
+  .hf-card-badges { display:flex; gap:4px; }
+  .hf-card-badge { font-size:10px; font-weight:700; padding:3px 6px; border-radius:3px; color:#fff; }
+  .hf-apply-btn { padding:0 16px; background:#111; color:#fff; border:none; border-radius:0 4px 4px 0; font-size:12px; font-weight:700; cursor:pointer; letter-spacing:0.06em; font-family:var(--sf); flex-shrink:0; min-height:46px; white-space:nowrap; }
+  .hf-promo-row { display:flex; }
+  .hf-promo-row .hf-input { border-radius:4px 0 0 4px; }
+  .hf-cta { width:100%; padding:16px; background:#111; color:#fff; border:none; border-radius:2px; font-size:14px; font-weight:700; letter-spacing:0.1em; cursor:pointer; font-family:var(--sf); transition:background 0.2s; }
+  .hf-cta.placing { background:#444; }
+
+  /* ── NOTIFICATIONS ── */
+  #notif-container { position:fixed; top:0; left:0; right:0; z-index:9999; padding-top:calc(var(--safe-top) + 8px); pointer-events:none; display:flex; flex-direction:column; gap:8px; padding-left:10px; padding-right:10px; }
+  .notif { transform:translateY(-120px); opacity:0; transition:transform 0.45s cubic-bezier(0.34,1.3,0.64,1), opacity 0.25s ease; pointer-events:none; }
+  .notif.show { transform:translateY(0); opacity:1; pointer-events:auto; }
+  .notif-inner { background:rgba(240,240,245,0.96); backdrop-filter:blur(20px); -webkit-backdrop-filter:blur(20px); border-radius:16px; padding:12px 14px; display:flex; align-items:center; gap:12px; box-shadow:0 4px 24px rgba(0,0,0,0.18); cursor:pointer; }
+  .notif-icon { width:38px; height:38px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0; }
+  .notif-content { flex:1; min-width:0; }
+  .notif-app-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:1px; }
+  .notif-app-label { font-size:11px; color:#666; font-weight:500; }
+  .notif-time-label { font-size:11px; color:#aaa; }
+  .notif-from { font-size:13px; font-weight:700; color:#111; margin-bottom:1px; }
+  .notif-body { font-size:12px; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+
+  /* ── ADMIN PANEL ── */
+  #admin { background:#0f1117; padding-top:var(--safe-top); }
+  .admin-header { display:flex; align-items:center; gap:10px; padding:20px 20px 16px; border-bottom:0.5px solid rgba(255,255,255,0.08); flex-shrink:0; }
+  .admin-title { font-size:20px; font-weight:700; color:#fff; }
+  .admin-badge { font-size:10px; font-weight:700; background:#ef4444; color:#fff; padding:3px 7px; border-radius:4px; letter-spacing:0.06em; margin-left:6px; vertical-align:middle; }
+  .admin-close { background:none; border:none; color:rgba(255,255,255,0.5); font-size:20px; cursor:pointer; margin-left:auto; min-width:44px; min-height:44px; display:flex; align-items:center; justify-content:center; border-radius:22px; }
+  .admin-close:active { background:rgba(255,255,255,0.1); }
+  .admin-scroll { flex:1; overflow-y:auto; -webkit-overflow-scrolling:touch; }
+  .admin-section { padding:20px; border-bottom:0.5px solid rgba(255,255,255,0.07); }
+  .admin-section-label { font-size:11px; color:rgba(255,255,255,0.35); font-weight:600; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:14px; }
+  .admin-btn { width:100%; padding:14px 16px; background:rgba(255,255,255,0.07); border:0.5px solid rgba(255,255,255,0.12); border-radius:12px; color:#fff; font-size:15px; font-weight:500; cursor:pointer; font-family:var(--sf); text-align:left; display:flex; align-items:center; gap:10px; margin-bottom:10px; transition:background 0.15s; }
+  .admin-btn:active { background:rgba(255,255,255,0.14); }
+  .admin-btn.danger { color:#ff6b6b; border-color:rgba(255,107,107,0.25); background:rgba(255,107,107,0.06); }
+  .admin-btn.success { color:#4ade80; border-color:rgba(74,222,128,0.25); background:rgba(74,222,128,0.06); }
+  .admin-toggle-row { display:flex; align-items:center; justify-content:space-between; padding:14px 16px; background:rgba(255,255,255,0.06); border:0.5px solid rgba(255,255,255,0.1); border-radius:12px; margin-bottom:10px; }
+  .admin-toggle-label { font-size:15px; color:#fff; font-weight:400; }
+  .admin-toggle-sub { font-size:12px; color:rgba(255,255,255,0.35); margin-top:2px; }
+  .admin-toggle { appearance:none; -webkit-appearance:none; width:50px; height:28px; border-radius:14px; background:rgba(255,255,255,0.18); cursor:pointer; position:relative; transition:background 0.2s; flex-shrink:0; }
+  .admin-toggle:checked { background:#34c759; }
+  .admin-toggle::after { content:''; position:absolute; top:3px; left:3px; width:22px; height:22px; border-radius:11px; background:#fff; transition:transform 0.2s; box-shadow:0 1px 4px rgba(0,0,0,0.3); }
+  .admin-toggle:checked::after { transform:translateX(22px); }
+  .admin-status-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:0.5px solid rgba(255,255,255,0.05); }
+  .admin-status-row:last-child { border-bottom:none; }
+  .admin-status-key { font-size:13px; color:rgba(255,255,255,0.35); }
+  .admin-status-val { font-size:13px; color:rgba(255,255,255,0.7); font-weight:500; }
 </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- HOME SCREEN -->
+  <!-- HOME -->
   <div class="screen active" id="home">
     <div class="home-clock">
       <div class="home-date" id="home-date"></div>
@@ -142,7 +212,7 @@
     </div>
     <div class="app-grid">
       <button class="app-icon-wrap" onclick="go('mail')">
-        <div class="app-icon" style="background:#1a73e8">✉️<div class="badge" id="mail-badge">6</div></div>
+        <div class="app-icon" style="background:#1a73e8">✉️<div class="badge" id="mail-badge" style="display:none">0</div></div>
         <span class="app-label">Mail</span>
       </button>
       <button class="app-icon-wrap" onclick="go('sms')">
@@ -157,7 +227,11 @@
       <button class="app-icon-wrap disabled"><div class="app-icon" style="background:#db2777">🖼</div><span class="app-label">Photos</span></button>
       <button class="app-icon-wrap disabled"><div class="app-icon" style="background:#0891b2">📍</div><span class="app-label">Maps</span></button>
       <button class="app-icon-wrap disabled"><div class="app-icon" style="background:#dc2626">📅</div><span class="app-label">Calendar</span></button>
-      <button class="app-icon-wrap disabled"><div class="app-icon" style="background:#475569">⚙️</div><span class="app-label">Settings</span></button>
+      <!-- Settings: visually dim but accessible to researcher -->
+      <button class="app-icon-wrap" onclick="go('admin')" style="opacity:0.32">
+        <div class="app-icon" style="background:#475569">⚙️</div>
+        <span class="app-label">Settings</span>
+      </button>
     </div>
     <div class="home-bar"><div class="home-bar-pill"></div></div>
   </div>
@@ -224,19 +298,99 @@
     <div class="scroll-area" id="browser-content"></div>
   </div>
 
+  <!-- ADMIN PANEL -->
+  <div class="screen" id="admin">
+    <div class="admin-header">
+      <div>
+        <span class="admin-title">Admin</span>
+        <span class="admin-badge">RESEARCHER</span>
+      </div>
+      <button class="admin-close" onclick="go('home')">✕</button>
+    </div>
+    <div class="admin-scroll">
+
+      <div class="admin-section">
+        <div class="admin-section-label">Prototype</div>
+        <button class="admin-btn danger" onclick="resetPrototype()">
+          <span>↺</span> Reset Prototype
+        </button>
+        <button class="admin-btn success" onclick="adminTriggerNotifications()">
+          <span>🔔</span> Trigger Order Notifications
+        </button>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-label">Inbox</div>
+        <div class="admin-toggle-row">
+          <div>
+            <div class="admin-toggle-label">Show all study emails</div>
+            <div class="admin-toggle-sub">Reveals all 6 emails for QA</div>
+          </div>
+          <input type="checkbox" class="admin-toggle" id="admin-all-toggle" onchange="toggleAllEmails(this.checked)">
+        </div>
+      </div>
+
+      <div class="admin-section">
+        <div class="admin-section-label">Current State</div>
+        <div class="admin-status-row"><span class="admin-status-key">Inbox mode</span><span class="admin-status-val" id="st-inbox">default</span></div>
+        <div class="admin-status-row"><span class="admin-status-key">Notifications</span><span class="admin-status-val" id="st-notif">not triggered</span></div>
+        <div class="admin-status-row"><span class="admin-status-key">Browser page</span><span class="admin-status-val" id="st-browser">mini-bag</span></div>
+        <div class="admin-status-row"><span class="admin-status-key">Emails visible</span><span class="admin-status-val" id="st-emails">—</span></div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- Notification banners (outside #app, position:fixed) -->
+<div id="notif-container">
+  <div class="notif" id="notif-harper">
+    <div class="notif-inner" onclick="openNotifEmail(5)">
+      <div class="notif-icon" style="background:#1e9e50">✉️</div>
+      <div class="notif-content">
+        <div class="notif-app-row">
+          <span class="notif-app-label">Mail</span>
+          <span class="notif-time-label">now</span>
+        </div>
+        <div class="notif-from">Harper Try Before You Buy</div>
+        <div class="notif-body">Your Boden Try Before You Buy order (XX0099333) confirmation</div>
+      </div>
+    </div>
+  </div>
+  <div class="notif" id="notif-boden">
+    <div class="notif-inner" onclick="openNotifEmail(6)">
+      <div class="notif-icon" style="background:#1a5c38">✉️</div>
+      <div class="notif-content">
+        <div class="notif-app-row">
+          <span class="notif-app-label">Mail</span>
+          <span class="notif-time-label">now</span>
+        </div>
+        <div class="notif-from">Boden</div>
+        <div class="notif-body">Thank you for your Try Before You Buy order (UK1234567)</div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
 const IMG = "https://stuart-ford.github.io/boden-study/images/";
 
 /* ── Email data ── */
-const EMAILS = [
-  { id:1, from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden try on period has ended", preview:"Your try on period has now ended. We hope you enjoyed the service.", time:"Today", unread:true, image:IMG+"Email%20-%20Harper%20Your%20Try%20Before%20You%20Buy%20Payment%20-%20Nothing%20Kept.png" },
-  { id:2, from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period ends tomorrow for Boden order (UK1234567)", preview:"A gentle reminder that your try on period ends at midnight tomorrow.", time:"Yesterday", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Ends%20Tomorrow.png" },
-  { id:3, from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period has started for Boden order (UK1234567)", preview:"Your pieces have arrived and your try on period has started.", time:"Mon", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Has%20Started.png" },
-  { id:4, from:"Boden", addr:"orders@boden.co.uk", subject:"Your Try Before You Buy order (UK1234567) has been shipped", preview:"Your BODEN order is on its way. We've handed it to our delivery partner.", time:"Sun", unread:true, image:IMG+"Email%20-%20Boden%20-%20Shipping%20Confirmation.png" },
-  { id:5, from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden Try Before You Buy order (UK1234567) confirmation", preview:"Your Boden Try Before You Buy order is confirmed. Your 7 day try on period will begin once your pieces arrive.", time:"Sat", unread:true, image:IMG+"Email%20-%20Harper%20-%20Order%20Confirmed.png" },
-  { id:6, from:"Boden", addr:"orders@boden.co.uk", subject:"Thank you for your Try Before You Buy order (UK1234567)", preview:"Thank you for choosing BODEN. We've received your order and we'll be in touch when it's on its way.", time:"Sat", unread:true, image:IMG+"Email%20-%20Boden%20-%20Order%20Confirmed.png" }
+/* study: true = study email | showInMode: which inbox modes reveal it */
+const EMAILS_SOURCE = [
+  // Study emails — later in the journey (admin QA / show all only)
+  { id:1, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden try on period has ended", preview:"Your try on period has now ended. We hope you enjoyed the service.", time:"Today", unread:true, image:IMG+"Email%20-%20Harper%20Your%20Try%20Before%20You%20Buy%20Payment%20-%20Nothing%20Kept.png" },
+  { id:2, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period ends tomorrow for Boden order (UK1234567)", preview:"A gentle reminder that your try on period ends at midnight tomorrow.", time:"Yesterday", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Ends%20Tomorrow.png" },
+  { id:3, study:true, showInMode:['all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your try on period has started for Boden order (UK1234567)", preview:"Your pieces have arrived and your try on period has started.", time:"Mon", unread:true, image:IMG+"Email%20-%20Harper%20-%20Your%20Try%20On%20Period%20Has%20Started.png" },
+  { id:4, study:true, showInMode:['all'], from:"Boden", addr:"orders@boden.co.uk", subject:"Your Try Before You Buy order (UK1234567) has been shipped", preview:"Your BODEN order is on its way. We've handed it to our delivery partner.", time:"Sun", unread:true, image:IMG+"Email%20-%20Boden%20-%20Shipping%20Confirmation.png" },
+  // Study emails — order confirmation pair (appear via notification after order placed)
+  { id:5, study:true, showInMode:['post-order','all'], from:"Harper Try Before You Buy", addr:"noreply@harperconcierge.com", subject:"Your Boden Try Before You Buy order (XX0099333) confirmation", preview:"Your Boden Try Before You Buy order is confirmed. Your 7 day try on period will begin once your pieces arrive.", time:"Just now", unread:true, image:IMG+"Email%20-%20Harper%20-%20Order%20Confirmed.png" },
+  { id:6, study:true, showInMode:['post-order','all'], from:"Boden", addr:"orders@boden.co.uk", subject:"Thank you for your Try Before You Buy order (UK1234567)", preview:"Thank you for choosing BODEN. We've received your order and we'll be in touch when it's on its way.", time:"Just now", unread:true, image:IMG+"Email%20-%20Boden%20-%20Order%20Confirmed.png" },
+  // Dummy filler emails — always visible
+  { id:7, study:false, from:"James Morris", addr:"j.morris@example.com", subject:"Re: Weekend plans", preview:"Sounds great — shall we say 7pm at the usual place?", time:"Fri", unread:false, image:null, body:"Sounds great to me — shall we say 7pm at the usual place?\n\nOn Fri 23 May, you wrote:\n> Hey, fancy grabbing dinner Saturday?\n\nJames" },
+  { id:8, study:false, from:"Netflix", addr:"info@mailer.netflix.com", subject:"New episodes added this week", preview:"Don't miss what's new. New seasons and new films just dropped.", time:"Thu", unread:false, image:null, body:"New this week on Netflix\n\n• The Crown: Series 7 — all episodes\n• Wednesday: Season 3, episodes 1–4\n• Leave the World Behind (Film)\n\nOpen the app to start watching." },
+  { id:9, study:false, from:"HSBC", addr:"noreply@hsbc.co.uk", subject:"Your statement is ready", preview:"Your May 2026 statement is now available to view online.", time:"Wed", unread:false, image:null, body:"Dear Customer,\n\nYour monthly statement for May 2026 is now ready to view in your online banking.\n\nAccount: Current Account ••••4821\nStatement date: 25 May 2026\n\nHSBC UK" },
 ];
 
 const THREADS = [
@@ -257,12 +411,19 @@ const THREADS = [
   ]}
 ];
 
+/* ── State ── */
+let emails = EMAILS_SOURCE.map(e => ({...e}));
+let inboxMode = 'default';       // 'default' | 'post-order' | 'all'
+let notificationsTriggered = false;
+let currentScreen = "home";
+let browserPage = "mini-bag";
+let browserHistory = [];
+
 /* ── Clock ── */
 function updateClock() {
   const now = new Date();
-  const hh = now.getHours().toString().padStart(2,"0");
-  const mm = now.getMinutes().toString().padStart(2,"0");
-  document.getElementById("home-time").textContent = `${hh}:${mm}`;
+  document.getElementById("home-time").textContent =
+    `${now.getHours().toString().padStart(2,"0")}:${now.getMinutes().toString().padStart(2,"0")}`;
   const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
   const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
   document.getElementById("home-date").textContent = `${days[now.getDay()]}, ${now.getDate()} ${months[now.getMonth()]}`;
@@ -270,31 +431,37 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 15000);
 
-/* ── App navigation ── */
-let currentScreen = "home";
+/* ── Navigation ── */
 function go(screenId) {
   document.getElementById(currentScreen).classList.remove("active");
   document.getElementById(screenId).classList.add("active");
   currentScreen = screenId;
-  if (screenId !== "email-view" && screenId !== "sms-view") {
-    const sa = document.getElementById(screenId).querySelector(".scroll-area");
-    if (sa) sa.scrollTop = 0;
-  }
+  if (screenId === 'admin') updateAdminStatus();
+  const sa = document.getElementById(screenId)?.querySelector(".scroll-area,.admin-scroll");
+  if (sa && screenId !== "email-view" && screenId !== "sms-view") sa.scrollTop = 0;
 }
 
 /* ── Mail ── */
-let emails = EMAILS.map(e => ({...e}));
+function getVisibleEmails() {
+  return emails.filter(e => {
+    if (!e.study) return true;
+    if (inboxMode === 'all') return true;
+    if (inboxMode === 'post-order') return e.showInMode.includes('post-order');
+    return false;
+  });
+}
 
 function renderMailList() {
-  const ul = document.getElementById("mail-list");
-  ul.innerHTML = "";
-  const unread = emails.filter(e => e.unread).length;
+  const visible = getVisibleEmails();
+  const unread = visible.filter(e => e.unread).length;
   document.getElementById("mail-unread-label").textContent = unread > 0 ? `${unread} unread` : "";
   const badge = document.getElementById("mail-badge");
   badge.textContent = unread;
   badge.style.display = unread > 0 ? "flex" : "none";
 
-  emails.forEach(e => {
+  const ul = document.getElementById("mail-list");
+  ul.innerHTML = "";
+  visible.forEach(e => {
     const btn = document.createElement("button");
     btn.className = "mail-row" + (e.unread ? " unread" : "");
     btn.innerHTML = `
@@ -319,16 +486,13 @@ function openEmail(id) {
   if (!e) return;
   e.unread = false;
   renderMailList();
-
   document.getElementById("ev-subject").textContent = e.subject;
   document.getElementById("ev-avatar").textContent = e.from[0];
   document.getElementById("ev-name").textContent = e.from;
   document.getElementById("ev-addr").textContent = e.addr;
   document.getElementById("ev-date").textContent = e.time;
-
   const body = document.getElementById("ev-body");
   body.innerHTML = "";
-
   if (e.image) {
     const loading = document.createElement("div");
     loading.className = "img-loading";
@@ -339,10 +503,52 @@ function openEmail(id) {
     img.onload = () => { body.innerHTML = ""; body.appendChild(img); };
     img.onerror = () => { loading.textContent = "Could not load email image."; };
     img.src = e.image;
+  } else if (e.body) {
+    e.body.split("\n").forEach(line => {
+      const p = document.createElement("p");
+      p.textContent = line;
+      body.appendChild(p);
+    });
   }
-
   go("email-view");
   document.getElementById("email-view").querySelector(".scroll-area").scrollTop = 0;
+}
+
+/* ── Notifications ── */
+function showOrderNotifications() {
+  inboxMode = 'post-order';
+  emails.forEach(e => { if (e.id === 5 || e.id === 6) e.unread = true; });
+  renderMailList();
+  notificationsTriggered = true;
+  updateAdminStatus();
+
+  const n1 = document.getElementById('notif-harper');
+  const n2 = document.getElementById('notif-boden');
+
+  // Harper notification: in at 1.5s, out at 6s
+  setTimeout(() => {
+    n1.classList.add('show');
+    setTimeout(() => n1.classList.remove('show'), 4500);
+  }, 1500);
+
+  // Boden notification: in at 6.5s, out at 11s
+  setTimeout(() => {
+    n2.classList.add('show');
+    setTimeout(() => n2.classList.remove('show'), 4500);
+  }, 6500);
+}
+
+function adminTriggerNotifications() {
+  // Force retrigger for researcher (e.g. between participants)
+  ['notif-harper','notif-boden'].forEach(id => document.getElementById(id).classList.remove('show'));
+  notificationsTriggered = false;
+  setTimeout(() => showOrderNotifications(), 200);
+}
+
+function openNotifEmail(emailId) {
+  ['notif-harper','notif-boden'].forEach(id => document.getElementById(id).classList.remove('show'));
+  go('mail');
+  openEmail(emailId);
 }
 
 /* ── SMS ── */
@@ -353,7 +559,6 @@ function renderSmsList() {
   const badge = document.getElementById("sms-badge");
   badge.textContent = totalUnread;
   badge.style.display = totalUnread > 0 ? "flex" : "none";
-
   THREADS.forEach(t => {
     const btn = document.createElement("button");
     btn.className = "sms-row" + (t.unread ? " unread" : "");
@@ -394,16 +599,10 @@ function openThread(id) {
     container.appendChild(wrap);
   });
   go("sms-view");
-  setTimeout(() => {
-    const sa = document.querySelector("#sms-view .scroll-area");
-    if (sa) sa.scrollTop = sa.scrollHeight;
-  }, 50);
+  setTimeout(() => { document.querySelector("#sms-view .scroll-area").scrollTop = 9999; }, 50);
 }
 
 /* ── Browser ── */
-let browserPage = "mini-bag";
-let browserHistory = [];
-
 function goPage(page) {
   browserHistory.push(browserPage);
   browserPage = page;
@@ -425,7 +624,8 @@ function renderBrowserPage() {
   const content = document.getElementById("browser-content");
   const urlText = document.getElementById("browser-url-text");
   const backBtn = document.getElementById("browser-back-btn");
-  backBtn.disabled = (browserHistory.length === 0 && browserPage === "home");
+  backBtn.disabled = (browserHistory.length === 0 && browserPage === "mini-bag");
+  updateAdminStatus();
 
   if (browserPage === "home") {
     urlText.textContent = "Search or enter website";
@@ -433,58 +633,190 @@ function renderBrowserPage() {
     content.innerHTML = `
       <div class="favs-label">Favourites</div>
       <div class="favs-grid">
-        <div class="fav-item" onclick="goPage('mini-bag')">
-          <div class="fav-icon" style="background:#1a5c38">🛍️</div>
-          <span class="fav-label">Boden</span>
-        </div>
-        <div class="fav-item">
-          <div class="fav-icon" style="background:#1a73e8">🔍</div>
-          <span class="fav-label">Google</span>
-        </div>
-        <div class="fav-item">
-          <div class="fav-icon" style="background:#111">📰</div>
-          <span class="fav-label">BBC News</span>
-        </div>
-        <div class="fav-item">
-          <div class="fav-icon" style="background:#e53935">▶️</div>
-          <span class="fav-label">YouTube</span>
-        </div>
+        <div class="fav-item" onclick="goPage('mini-bag')"><div class="fav-icon" style="background:#1a5c38">🛍️</div><span class="fav-label">Boden</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#1a73e8">🔍</div><span class="fav-label">Google</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#111">📰</div><span class="fav-label">BBC News</span></div>
+        <div class="fav-item"><div class="fav-icon" style="background:#e53935">▶️</div><span class="fav-label">YouTube</span></div>
       </div>
-      <div class="browser-new-tab">
-        <div class="browser-new-tab-title">New tab</div>
-        <div class="browser-new-tab-sub">Pages you visit won't appear in your browsing history</div>
-      </div>
+      <div class="browser-new-tab"><div class="browser-new-tab-title">New tab</div><div class="browser-new-tab-sub">Pages you visit won't appear in your browsing history</div></div>
     `;
   }
   else if (browserPage === "mini-bag") {
     urlText.textContent = "boden.com";
     urlText.style.color = "#333";
     const isDesktop = window.innerWidth >= 1024;
-    const imgSrc = isDesktop
-      ? IMG + "Harper%20-%20Mini%20Bag%20-%20Desktop.png"
-      : IMG + "Harper%20-%20Mini%20Bag%20-%20Mobile.png";
-
-    // Hotspot positions measured from image pixel analysis
-    // Mobile:  TRY BEFORE YOU BUY sits at ~81–86.5% height, 13–90% width
-    // Desktop: TRY BEFORE YOU BUY sits at ~84.5–87.5% height, 73–99% width
-    const hotspot = isDesktop
-      ? `top:84.5%;left:73%;width:26%;height:3%;`
-      : `top:81%;left:13%;width:77%;height:5.5%;`;
-
+    const imgSrc = isDesktop ? IMG+"Harper%20-%20Mini%20Bag%20-%20Desktop.png" : IMG+"Harper%20-%20Mini%20Bag%20-%20Mobile.png";
+    const hotspot = isDesktop ? `top:84.5%;left:73%;width:26%;height:3%;` : `top:81%;left:13%;width:77%;height:5.5%;`;
     content.innerHTML = `
       <div style="position:relative;width:100%;line-height:0">
-        <img src="${imgSrc}" style="width:100%;display:block" alt="Boden Mini Bag" id="mini-bag-img">
+        <img src="${imgSrc}" style="width:100%;display:block" alt="Boden Mini Bag">
         <div class="hotspot" onclick="goPage('harper-basket')" style="${hotspot}" aria-label="Try Before You Buy"></div>
-      </div>
-    `;
+      </div>`;
   }
   else if (browserPage === "harper-basket") {
     urlText.textContent = "harperconcierge.com";
     urlText.style.color = "#333";
     content.innerHTML = `
-      <img src="${IMG}Harper%20-%20Default%20Basket%20-%20Mobile.png" style="width:100%;display:block" alt="Harper Try Before You Buy">
-    `;
+      <div class="hf-page">
+        <div class="hf-header"><span class="hf-logo">BODEN</span><span class="hf-powered">Powered by <em>harper.</em></span></div>
+        <div class="hf-hero">
+          <h1>Try Before You Buy</h1>
+          <p class="hf-hero-sub">The most convenient way to shop online &nbsp;<a class="hf-link" href="#">Learn more</a></p>
+          <div class="hf-benefits">
+            <div class="hf-benefit"><span>↺</span> Try multiple sizes &amp; styles</div>
+            <div class="hf-benefit"><span>💳</span> Only pay for what you keep</div>
+            <div class="hf-benefit"><span>⏱</span> No waiting for refunds</div>
+          </div>
+        </div>
+        <div class="hf-section">
+          <div class="hf-section-header" onclick="toggleHfSection(this)">
+            <span class="hf-section-title" style="margin:0">Your Selection <span class="hf-count">2</span></span>
+            <span class="hf-chevron">▾</span>
+          </div>
+          <div class="hf-selection-body">
+            <div class="hf-item"><div class="hf-item-name">Scoop Neck Jacquard Dress</div><div class="hf-item-meta">Yellow Jacquard · Size: 18 · Qty: 1</div><div class="hf-item-price">£359</div></div>
+            <div class="hf-item"><div class="hf-item-name">Angel Sleeve Boat Neck Dress</div><div class="hf-item-meta">Tourmaline Blue, Orchid Canopy · Size: 18 · Qty: 1</div><div class="hf-item-price">£279</div></div>
+          </div>
+        </div>
+        <div class="hf-section">
+          <div class="hf-section-title">Your Details</div>
+          <div class="hf-field"><input class="hf-input" type="text" placeholder="First Name" autocomplete="given-name"></div>
+          <div class="hf-field"><input class="hf-input" type="text" placeholder="Surname" autocomplete="family-name"></div>
+          <div class="hf-field"><input class="hf-input hf-input-with-icon" type="email" placeholder="Email" value="info@harperconcierge.com" autocomplete="email"><span class="hf-field-suffix" style="font-size:13px">ⓘ</span></div>
+          <div class="hf-field hf-phone-row"><div class="hf-phone-prefix">🇬🇧 +44</div><input class="hf-input hf-input-phone" type="tel" placeholder="Mobile number" autocomplete="tel"></div>
+          <div class="hf-field"><input class="hf-input hf-input-with-icon" type="text" placeholder="Start typing your address" autocomplete="street-address"><span class="hf-field-suffix">🔍</span></div>
+          <div id="hf-manual-fields" style="display:none">
+            <div class="hf-field"><input class="hf-input" type="text" placeholder="Address line 1"></div>
+            <div class="hf-field"><input class="hf-input" type="text" placeholder="Address line 2 (optional)"></div>
+            <div class="hf-field"><input class="hf-input" type="text" placeholder="Town / City"></div>
+            <div class="hf-field"><input class="hf-input" type="text" placeholder="Postcode"></div>
+          </div>
+          <a class="hf-link hf-manual-link" onclick="toggleManualAddress(event)">Enter address manually</a>
+          <div style="display:flex;align-items:flex-start;gap:10px;margin-top:12px">
+            <input type="checkbox" id="hf-marketing" style="margin-top:2px;width:16px;height:16px;flex-shrink:0;accent-color:#1a5c38">
+            <label for="hf-marketing" style="font-size:13px;color:#555;line-height:1.4;cursor:pointer">Sign me up for news and offers from Boden</label>
+          </div>
+        </div>
+        <div class="hf-section">
+          <div class="hf-section-title">Select Service</div>
+          <div class="hf-service-card">
+            <div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px">
+              <input type="radio" name="hf-service" checked style="width:18px;height:18px;margin-top:2px;accent-color:#1a5c38;flex-shrink:0">
+              <div><div style="font-size:15px;font-weight:600">Try for 7 Days</div><div style="font-size:12px;color:#777;margin-top:2px">Try on and return pieces within 7 days. <a class="hf-link" style="font-size:12px" href="#">Learn more</a></div></div>
+            </div>
+            <div class="hf-checklist">
+              <div class="hf-check-item">✓ &nbsp;Try on period starts once pieces are received</div>
+              <div class="hf-check-item">✓ &nbsp;Charged after 7 days for the pieces kept</div>
+              <div class="hf-check-item">✓ &nbsp;No waiting for refunds</div>
+            </div>
+            <div style="margin-top:12px">
+              <label class="hf-delivery-option hf-delivery-selected"><input type="radio" name="hf-delivery" checked style="accent-color:#1a5c38;flex-shrink:0"><span style="flex:1"><span style="font-size:14px;font-weight:500;display:block">Standard Delivery</span><span style="font-size:12px;color:#888">1–3 working days</span></span><span style="font-size:14px;font-weight:500">£5.00</span></label>
+              <label class="hf-delivery-option"><input type="radio" name="hf-delivery" style="accent-color:#1a5c38;flex-shrink:0"><span style="flex:1"><span style="font-size:14px;font-weight:500;display:block">Next Day Delivery</span><span style="font-size:12px;color:#888">Order before 3pm</span></span><span style="font-size:14px;font-weight:500">£8.00</span></label>
+            </div>
+          </div>
+          <p style="font-size:12px;color:#888;margin-top:10px">Any questions? <a class="hf-link" style="font-size:12px" href="#">Read our FAQs</a></p>
+          <p style="font-size:12px;color:#888;margin-top:5px">Subject to approval. Checking for eligibility is immediate and won't affect your credit score.</p>
+        </div>
+        <div class="hf-section">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <div class="hf-section-title" style="margin:0">Payment Method</div>
+            <div class="hf-card-badges"><span class="hf-card-badge" style="background:#1a1f71">VISA</span><span class="hf-card-badge" style="background:#eb001b">MC</span><span class="hf-card-badge" style="background:#016fd0">AMEX</span></div>
+          </div>
+          <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.5">You will only be charged today for the delivery fee. Payment for pieces you keep will be taken at the end of your try on period.</p>
+          <div class="hf-field"><input class="hf-input hf-input-with-icon" type="text" placeholder="Card number" value="4659 - XXXX - XXXX - XXXX" inputmode="numeric"><span class="hf-field-suffix">🔒</span></div>
+          <div class="hf-field"><input class="hf-input" type="text" placeholder="Name on card" value="J Bloggs" autocomplete="cc-name"></div>
+          <div style="display:flex;gap:10px">
+            <div class="hf-field" style="flex:1;margin-bottom:0"><input class="hf-input" type="text" placeholder="MM / YY" value="02/24" inputmode="numeric"></div>
+            <div class="hf-field" style="flex:1;margin-bottom:0;position:relative"><input class="hf-input hf-input-with-icon" type="text" placeholder="CVV" value="123" inputmode="numeric"><span class="hf-field-suffix" style="font-size:13px">ⓘ</span></div>
+          </div>
+          <p style="font-size:12px;color:#888;margin-top:10px;line-height:1.4">As part of our verification process, you may see a small charge and refund on your bank statement.</p>
+          <p style="font-size:12px;color:#555;margin-top:8px">🔒 &nbsp;Secure &amp; encrypted</p>
+        </div>
+        <div class="hf-section">
+          <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid #ebebeb;margin-bottom:12px"><span style="font-size:14px;color:#555">Delivery</span><span style="font-size:14px;color:#555">Calculated at next step</span></div>
+          <div class="hf-promo-row hf-field"><input class="hf-input" type="text" placeholder="Promo code"><button class="hf-apply-btn">APPLY</button></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;padding:4px 0"><span style="font-size:15px;font-weight:600">Today You Pay &nbsp;<span style="font-size:13px;font-weight:400;color:#888">ⓘ</span></span><span style="font-size:15px;font-weight:600">£0.00</span></div>
+        </div>
+        <div style="padding:16px 16px 0">
+          <button class="hf-cta" id="hf-cta-btn" onclick="harperOrderComplete()">COMPLETE ORDER</button>
+          <p style="font-size:12px;color:#555;text-align:center;margin-top:10px">🔒 &nbsp;Secure &amp; encrypted</p>
+          <div style="display:flex;justify-content:center;gap:20px;margin:10px 0"><a class="hf-link" style="font-size:13px" href="#">FAQs</a><a class="hf-link" style="font-size:13px" href="#">Privacy Policy</a></div>
+          <p style="font-size:11px;color:#999;text-align:center;line-height:1.6">By ordering with us you agree to Boden's <a class="hf-link" style="font-size:11px" href="#">terms and conditions</a> and Harper's Try Before You Buy <a class="hf-link" style="font-size:11px" href="#">terms and conditions</a>.</p>
+          <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin:16px 0;padding-top:14px;border-top:0.5px solid #ebebeb"><span style="color:#00b67a;font-size:14px">★★★★★</span><span style="font-size:12px;font-weight:600;color:#333">Excellent</span></div>
+        </div>
+      </div>`;
   }
+  else if (browserPage === "harper-confirmation") {
+    urlText.textContent = "harperconcierge.com";
+    urlText.style.color = "#333";
+    const isDesktop = window.innerWidth >= 1024;
+    const imgSrc = isDesktop
+      ? IMG + "Harper%20-%20Order%20Details%20Confirmation%20-%20Desktop.png"
+      : IMG + "Harper%20-%20Order%20Details%20Confirmation%20-%20Mobile.png";
+    content.innerHTML = `<img src="${imgSrc}" style="width:100%;display:block" alt="Order Confirmation">`;
+    // Trigger notifications once per prototype run
+    if (!notificationsTriggered) {
+      setTimeout(() => showOrderNotifications(), 800);
+    }
+  }
+}
+
+/* ── Harper form helpers ── */
+function toggleHfSection(header) {
+  const body = header.nextElementSibling;
+  const chevron = header.querySelector(".hf-chevron");
+  const open = body.style.display !== "none";
+  body.style.display = open ? "none" : "block";
+  chevron.style.transform = open ? "rotate(-90deg)" : "";
+}
+
+function toggleManualAddress(e) {
+  if (e) e.preventDefault();
+  const fields = document.getElementById("hf-manual-fields");
+  if (fields) fields.style.display = fields.style.display === "none" ? "block" : "none";
+}
+
+function harperOrderComplete() {
+  const btn = document.getElementById("hf-cta-btn");
+  if (!btn || btn.disabled) return;
+  btn.textContent = "Placing order…";
+  btn.classList.add("placing");
+  btn.disabled = true;
+  setTimeout(() => goPage("harper-confirmation"), 700);
+}
+
+/* ── Admin ── */
+function resetPrototype() {
+  inboxMode = 'default';
+  notificationsTriggered = false;
+  emails = EMAILS_SOURCE.map(e => ({...e}));
+  browserPage = 'mini-bag';
+  browserHistory = [];
+  ['notif-harper','notif-boden'].forEach(id => document.getElementById(id).classList.remove('show'));
+  document.getElementById('admin-all-toggle').checked = false;
+  renderMailList();
+  renderBrowserPage();
+  updateAdminStatus();
+  go('home');
+}
+
+function toggleAllEmails(checked) {
+  if (checked) {
+    inboxMode = 'all';
+  } else {
+    inboxMode = notificationsTriggered ? 'post-order' : 'default';
+  }
+  renderMailList();
+  updateAdminStatus();
+}
+
+function updateAdminStatus() {
+  const visible = getVisibleEmails();
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('st-inbox', inboxMode);
+  set('st-notif', notificationsTriggered ? 'triggered' : 'not triggered');
+  set('st-browser', browserPage);
+  set('st-emails', `${visible.length} visible (${visible.filter(e=>e.unread).length} unread)`);
 }
 
 /* ── Init ── */

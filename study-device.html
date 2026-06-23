@@ -401,7 +401,7 @@ function openThread(id) {
 }
 
 /* ── Browser ── */
-let browserPage = "home";
+let browserPage = "mini-bag";
 let browserHistory = [];
 
 function goPage(page) {
@@ -461,8 +461,8 @@ function renderBrowserPage() {
     urlText.style.color = "#333";
     const isDesktop = window.innerWidth >= 1024;
     const imgSrc = isDesktop
-      ? IMG + "Harper_-_Mini_Bag_-_Desktop.png"
-      : IMG + "Harper_-_Mini_Bag_-_Mobile.png";
+      ? IMG + "Harper%20-%20Mini%20Bag%20-%20Desktop.png"
+      : IMG + "Harper%20-%20Mini%20Bag%20-%20Mobile.png";
 
     // Hotspot positions measured from image pixel analysis
     // Mobile:  TRY BEFORE YOU BUY sits at ~81–86.5% height, 13–90% width
@@ -482,7 +482,7 @@ function renderBrowserPage() {
     urlText.textContent = "harperconcierge.com";
     urlText.style.color = "#333";
     content.innerHTML = `
-      <img src="${IMG}Harper_-_Default_Basket_-_Mobile.png" style="width:100%;display:block" alt="Harper Try Before You Buy">
+      <img src="${IMG}Harper%20-%20Default%20Basket%20-%20Mobile.png" style="width:100%;display:block" alt="Harper Try Before You Buy">
     `;
   }
 }
